@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>藥品電子檔查詢 · 藥劑科工作站</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="cross"></span>藥劑科工作站</a>
+    <nav class="topnav">
+      <a href="index.html#forms">表單</a>
+      <a href="drugs.html">藥品查詢</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero" style="padding-bottom:8px;">
+    <span class="eyebrow">DB-01 · DRUG REFERENCE</span>
+    <h1>藥品電子檔查詢</h1>
+    <p class="lede">輸入學名、商品名、代碼或用途關鍵字，即可即時篩選。資料維護方式請見 README。</p>
+  </section>
+
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="q" type="text" placeholder="例如：Amoxicillin、安莫西林、抗生素、AMX-001…" autocomplete="off">
+  </div>
+
+  <div class="result-count" id="count"></div>
+
+  <div id="list"></div>
+
+</main>
+
+<footer>
+  <div class="wrap">藥劑科工作站 · 藥品資料庫僅供院內同仁參考，實際用藥請以最新仿單與醫囑為準</div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
