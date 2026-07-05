@@ -343,3 +343,85 @@ footer{
   padding:48px 0;
   color:var(--ink-soft);
 }
+
+/* ---------- 衛教區卡片 ---------- */
+.edu-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:28px;
+}
+
+.edu-card{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+.edu-media{
+  width:100%;
+  aspect-ratio:16/9;
+  background:var(--amber-soft);
+  overflow:hidden;
+}
+.edu-media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.edu-body{
+  padding:20px 22px 22px;
+}
+.edu-body .code{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:var(--teal-dark);
+  background:var(--amber-soft);
+  padding:2px 8px;
+  border-radius:4px;
+  display:inline-block;
+}
+.edu-body h3{
+  font-family:'Noto Serif TC', serif;
+  font-size:20px;
+  margin:10px 0 8px;
+}
+.edu-body p{
+  font-size:14px;
+  color:var(--ink-soft);
+  margin:0 0 16px;
+}
+
+/* 16:9 響應式影片容器，YouTube iframe 用 */
+.video-wrap{
+  position:relative;
+  width:100%;
+  padding-top:56.25%;
+  border-radius:6px;
+  overflow:hidden;
+  background:#000;
+}
+.video-wrap iframe{
+  position:absolute;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+.edu-tags{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:0 0 14px;
+}
+.edu-tags span{
+  font-size:12px;
+  color:var(--ink-soft);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:2px 10px;
+}

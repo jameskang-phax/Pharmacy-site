@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用藥衛教區 · 藥劑科工作站</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="cross"></span>藥劑科工作站</a>
+    <nav class="topnav">
+      <a href="index.html#forms">表單</a>
+      <a href="drugs.html">藥品查詢</a>
+      <a href="education.html">衛教區</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero" style="padding-bottom:8px;">
+    <span class="eyebrow">ED · PATIENT EDUCATION</span>
+    <h1>用藥衛教區</h1>
+    <p class="lede">給病人與家屬看的衛教圖片與影片，也可以在諮詢櫃檯播放給同仁參考。</p>
+  </section>
+
+  <div class="edu-grid">
+
+    <!-- =========================================================
+         衛教主題卡片：複製整個 <article class="edu-card">…</article>
+         就能新增一個主題，說明請見下方 README 或頁面最下方注解
+         ========================================================= -->
+
+    <article class="edu-card">
+      <div class="edu-media">
+        <img src="images/edu-inhaler.jpg" alt="吸入劑正確使用步驟示意圖">
+      </div>
+      <div class="edu-body">
+        <span class="code">ED-01</span>
+        <h3>吸入劑正確使用步驟</h3>
+        <div class="edu-tags"><span>氣喘</span><span>慢性阻塞性肺病</span></div>
+        <p>示範定量吸入劑（MDI）的正確操作順序：搖勻、吐氣、按壓同時緩慢吸氣、閉氣十秒。</p>
+        <div class="video-wrap">
+          <iframe
+            src="https://www.youtube.com/embed/REPLACE_WITH_VIDEO_ID_1"
+            title="吸入劑使用教學影片"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+    </article>
+
+    <article class="edu-card">
+      <div class="edu-media">
+        <img src="images/edu-insulin.jpg" alt="胰島素注射衛教圖">
+      </div>
+      <div class="edu-body">
+        <span class="code">ED-02</span>
+        <h3>胰島素注射與保存</h3>
+        <div class="edu-tags"><span>糖尿病</span><span>居家照護</span></div>
+        <p>說明注射部位輪替、針頭處理方式，以及未開封／已開封胰島素的保存溫度與有效期限。</p>
+        <div class="video-wrap">
+          <iframe
+            src="https://www.youtube.com/embed/REPLACE_WITH_VIDEO_ID_2"
+            title="胰島素注射教學影片"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+    </article>
+
+    <!-- 範例：只有圖片、沒有影片的衛教卡片，把 video-wrap 整段刪掉即可 -->
+    <article class="edu-card">
+      <div class="edu-media">
+        <img src="images/edu-storage.jpg" alt="藥品居家保存方式圖卡">
+      </div>
+      <div class="edu-body">
+        <span class="code">ED-03</span>
+        <h3>藥品居家保存原則</h3>
+        <div class="edu-tags"><span>用藥安全</span></div>
+        <p>常溫、避光、冷藏三大類藥品保存重點整理，以及「藥品有效期限」與「開封後效期」的差異。</p>
+      </div>
+    </article>
+
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">藥劑科工作站 · 衛教內容僅供參考，個別用藥請依醫師與藥師指示</div>
+</footer>
+
+</body>
+</html>
