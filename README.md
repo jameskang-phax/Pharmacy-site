@@ -3,7 +3,7 @@
 一個放在 GitHub Pages 上的科內入口網頁，包含：
 
 - 三個表單入口（連結到 Google 表單）
-- 一個藥品電子檔查詢頁面（純網頁，資料寫在 `script.js` 裡）
+- 一個「藥品查詢」連結，直接連到醫院官方藥品查詢系統
 
 不需要任何伺服器、資料庫或程式安裝，全部都是靜態網頁。
 
@@ -16,7 +16,7 @@
 3. Repository name 填 `pharmacy-site`（或任何你喜歡的名字），Visibility 選 **Public**（GitHub Pages 免費方案需要公開 repo）
 4. 建立好後，把這個資料夾裡所有檔案上傳：
    - 進到 repo 頁面 → `Add file` → `Upload files`
-   - 把 `index.html`、`drugs.html`、`script.js`、`styles.css`、`README.md` 拖進去
+   - 把 `index.html`、`education.html`、`styles.css`、`README.md` 拖進去
    - 下方填寫說明文字（例如「初版上傳」），按 `Commit changes`
 
 ## 第二步：開啟 GitHub Pages
@@ -93,28 +93,12 @@ https://forms.gle/REPLACE_WITH_YOUR_FORM_3
 
 ---
 
-## 第四步：維護藥品電子檔
+## 第四步：藥品查詢連結
 
-藥品資料寫在 `script.js` 最上方的 `DRUGS` 陣列裡，格式如下：
+首頁、衛教區導覽列的「藥品查詢」都直接連到醫院官方查詢系統：
+`https://rt01.sinlau.org.tw/sinlau/pgm/slh-out-mq/`
 
-```js
-{
-  code: "AMX-001",              // 內部代碼，自訂即可
-  generic: "Amoxicillin",       // 學名
-  brand: "安莫西林膠囊",          // 商品名
-  form: "膠囊 250mg / 500mg",    // 劑型劑量
-  route: "口服",                 // 給藥途徑
-  use: "細菌感染（呼吸道、泌尿道、皮膚等）",
-  sideEffect: "腹瀉、噁心、皮疹",
-  warning: "青黴素過敏者禁用",
-  storage: "室溫，避光"
-}
-```
-
-**新增藥品**：複製一整組 `{ ... }`，貼在陣列裡（記得中間用逗號分隔），修改內容後存檔。
-**修改/刪除藥品**：直接找到對應那一組文字修改或刪除即可。
-
-在 GitHub 網頁上編輯：進到 repo → 點 `script.js` → 右上角鉛筆圖示 → 修改 → 下方 `Commit changes`。不需要在自己電腦安裝任何軟體。
+如果之後這個系統網址有變動，到 `index.html` 和 `education.html` 裡搜尋這串網址，換成新的即可。
 
 ---
 
@@ -235,10 +219,8 @@ https://forms.gle/REPLACE_WITH_YOUR_FORM_3
 
 ```
 pharmacy-site/
-├── index.html       # 首頁，表單與查詢入口
-├── drugs.html       # 藥品電子檔查詢頁
+├── index.html       # 首頁，表單、藥品查詢入口、公告事項
 ├── education.html   # 用藥衛教區（圖片＋影片）
-├── script.js        # 藥品資料 + 搜尋邏輯
 ├── styles.css       # 共用樣式
 ├── images/          # 衛教區用的圖片（自行上傳）
 └── README.md        # 本說明文件
