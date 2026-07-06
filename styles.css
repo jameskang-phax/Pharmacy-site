@@ -673,6 +673,22 @@ footer{
   border-left:3px solid var(--teal);
   border-radius:6px;
   padding:14px 16px;
+  position:relative;
+}
+.announce-item.is-pinned{
+  background:var(--amber-soft);
+  border-left:3px solid var(--amber);
+}
+.announce-pin-badge{
+  display:inline-block;
+  font-size:11px;
+  font-weight:700;
+  color:var(--teal-dark);
+  background:#fff;
+  border:1px solid var(--amber);
+  border-radius:999px;
+  padding:2px 9px;
+  margin-bottom:6px;
 }
 .announce-date{
   font-family:'IBM Plex Mono', monospace;
@@ -690,6 +706,34 @@ footer{
   color:var(--ink-soft);
   margin-top:4px;
   white-space:pre-wrap;
+}
+.announce-hidden{
+  display:none;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+}
+.announce-hidden.is-open{
+  display:flex;
+}
+.announce-toggle-wrap{
+  margin-top:14px;
+  text-align:center;
+}
+.announce-toggle{
+  background:none;
+  border:1px solid var(--line);
+  color:var(--teal-dark);
+  border-radius:999px;
+  padding:8px 20px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  transition:border-color .15s ease, background .15s ease;
+}
+.announce-toggle:hover{
+  border-color:var(--teal);
+  background:var(--amber-soft);
 }
 .announce-empty{
   text-align:center;

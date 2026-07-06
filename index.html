@@ -119,9 +119,10 @@
         </a>
         <button class="announce-refresh" id="announce-refresh" type="button">重新整理</button>
       </div>
-      
+      <p class="announce-note">點「新增公告」會開啟表單，全院同仁填寫後，公告會自動出現在下方清單，依時間新到舊排列。表單送出後大約需要 1 分鐘生效，如果沒看到，按一下「重新整理」。</p>
 
       <div class="announce-list" id="announce-list"></div>
+      <div class="announce-toggle-wrap" id="announce-toggle-wrap"></div>
       <p class="announce-empty" id="announce-empty" style="display:none;">目前還沒有公告。</p>
       <p class="announce-error" id="announce-error" style="display:none;">公告載入失敗，請確認網路連線，或稍後再試一次。</p>
     </section>
@@ -131,7 +132,7 @@
 </main>
 
 <footer>
-  
+  <div class="wrap">麻豆新樓醫院藥劑科工作站 · 內部使用 · 若表單涉及病人資料，請先確認符合院內個資規範</div>
 </footer>
 
 <script>
@@ -206,29 +207,57 @@ function renderAnnouncements(rows){
   var listEl = document.getElementById('announce-list');
   var emptyEl = document.getElementById('announce-empty');
   var errorEl = document.getElementById('announce-error');
+  var toggleWrap = document.getElementById('announce-toggle-wrap');
   errorEl.style.display = 'none';
 
-  var dataRows = rows.slice(1); // 第一列是表頭：時間戳記／公告標題／公告內容
+  // 第一列是表頭：時間戳記／公告標題／公告內容／是否置頂
+  var dataRows = rows.slice(1);
   var items = dataRows.map(function(r){
-    return { ts: r[0] || '', title: r[1] || '', body: r[2] || '' };
+    var pinRaw = (r[3] || '').trim();
+    var isPinned = pinRaw === '是' || pinRaw.toLowerCase() === 'yes' || pinRaw.toLowerCase() === 'true';
+    return { ts: r[0] || '', title: r[1] || '', body: r[2] || '', pinned: isPinned };
   }).filter(function(item){ return item.title.trim() !== ''; });
 
-  items.sort(function(a,b){ return new Date(b.ts) - new Date(a.ts); });
+  items.sort(function(a,b){
+    if(a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+    return new Date(b.ts) - new Date(a.ts);
+  });
 
   if(items.length === 0){
     listEl.innerHTML = '';
     emptyEl.style.display = 'block';
+    toggleWrap.innerHTML = '';
     return;
   }
   emptyEl.style.display = 'none';
 
-  listEl.innerHTML = items.map(function(item){
-    return '<div class="announce-item">' +
+  var LIMIT = 10;
+  var visibleItems = items.slice(0, LIMIT);
+  var hiddenItems = items.slice(LIMIT);
+
+  function itemHtml(item){
+    return '<div class="announce-item' + (item.pinned ? ' is-pinned' : '') + '">' +
+      (item.pinned ? '<span class="announce-pin-badge">📌 置頂</span>' : '') +
       '<div class="announce-date">' + formatTimestamp(item.ts) + '</div>' +
       '<div class="announce-title">' + escapeHtml(item.title) + '</div>' +
       (item.body ? '<div class="announce-body">' + escapeHtml(item.body) + '</div>' : '') +
     '</div>';
-  }).join('');
+  }
+
+  listEl.innerHTML = visibleItems.map(itemHtml).join('') +
+    (hiddenItems.length > 0 ? '<div class="announce-hidden" id="announce-hidden">' + hiddenItems.map(itemHtml).join('') + '</div>' : '');
+
+  if(hiddenItems.length > 0){
+    toggleWrap.innerHTML = '<button class="announce-toggle" id="announce-toggle-btn" type="button">顯示全部 ' + items.length + ' 則公告</button>';
+    document.getElementById('announce-toggle-btn').addEventListener('click', function(){
+      var hiddenEl = document.getElementById('announce-hidden');
+      var isOpen = hiddenEl.classList.contains('is-open');
+      hiddenEl.classList.toggle('is-open');
+      this.textContent = isOpen ? ('顯示全部 ' + items.length + ' 則公告') : '收合公告';
+    });
+  }else{
+    toggleWrap.innerHTML = '';
+  }
 }
 
 function loadAnnouncements(){
