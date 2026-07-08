@@ -103,6 +103,19 @@ body{
 .drug-quicklink svg{ width:15px; height:15px; }
 .drug-quicklink:hover{ background:var(--teal-dark); }
 
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.drug-quicklink.is-storage{
+  background:var(--amber);
+}
+.drug-quicklink.is-storage:hover{
+  background:#a86018;
+}
+
 /* ---------- Hero（單行標題） ---------- */
 .hero-simple{
   padding:44px 0 8px;
@@ -339,6 +352,16 @@ footer{
   margin:-10px 0 18px;
 }
 
+.storage-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:-10px 0 18px;
+}
+.storage-actions .result-count{
+  margin:0;
+}
+
 .drug-card{
   background:var(--paper);
   border:1px solid var(--line);
@@ -394,6 +417,21 @@ footer{
 }
 .drug-card dd.warn{
   color:var(--alert);
+}
+.drug-card dd.loc{
+  display:inline-block;
+  font-family:'IBM Plex Mono', monospace;
+  font-weight:700;
+  color:var(--teal-dark);
+  background:var(--amber-soft);
+  padding:2px 10px;
+  border-radius:4px;
+}
+.drug-card dd.loc.empty{
+  color:var(--ink-soft);
+  background:none;
+  font-weight:400;
+  padding:0;
 }
 
 .empty-state{

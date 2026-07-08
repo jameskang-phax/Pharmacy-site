@@ -102,58 +102,98 @@ https://forms.gle/REPLACE_WITH_YOUR_FORM_3
 
 ---
 
-## 第五步：維護「用藥衛教區」（圖片＋影片）
+## 第五步：維護「用藥衛教區」（雲端資料夾連結）
 
-衛教區的頁面是 `education.html`，裡面每一個主題是一張卡片，長這樣：
+衛教區現在的做法是：**Google 雲端硬碟裡建好分類資料夾（放圖片、影片）→ 網站上每個分類卡片直接連到對應的資料夾**。同仁點卡片，會直接開啟 Google Drive 看到裡面所有圖片和影片。
 
-```html
-<article class="edu-card">
-  <div class="edu-media">
-    <img src="images/edu-inhaler.jpg" alt="吸入劑正確使用步驟示意圖">
-  </div>
-  <div class="edu-body">
-    <span class="code">ED-01</span>
-    <h3>吸入劑正確使用步驟</h3>
-    <div class="edu-tags"><span>氣喘</span><span>慢性阻塞性肺病</span></div>
-    <p>示範定量吸入劑（MDI）的正確操作順序…</p>
-    <div class="video-wrap">
-      <iframe
-        src="https://www.youtube.com/embed/REPLACE_WITH_VIDEO_ID_1"
-        title="吸入劑使用教學影片"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-    </div>
-  </div>
-</article>
-```
+目前網站上有 7 張分類卡片，對應到你雲端硬碟「衛教專區」底下的 7 個資料夾：
 
-### 圖片怎麼放上去？
+| 卡片編號 | 分類 |
+|---|---|
+| ED-01 | 01衛教-外用 |
+| ED-02 | 02衛教-筆型胰島素 |
+| ED-03 | 03衛教-吸入劑（改為直接顯示圖片，見下方說明） |
+| ED-04 | 04衛教-兒童用藥 |
+| ED-05 | 05衛教-一般藥品 |
+| ED-06 | 06衛教-用藥須知 |
+| ED-07 | 07衛教-影片 |
 
-1. 準備好圖片檔（建議用 `.jpg`，檔案不要太大，單張建議 500KB 以下，手機拍照後可用「編輯」功能先壓縮或裁切）
-2. 到 GitHub repo 頁面 → 點 **Add file** → **Upload files**
-3. 上傳前，先在檔名前面加上資料夾名稱，例如把檔名改成 `images/edu-inhaler.jpg`（GitHub 網頁上傳時，只要檔名有 `/`，就會自動建立資料夾），或是先建立好 `images` 資料夾再把檔案丟進去
-4. Commit 存檔後，回到 `education.html`，把對應卡片的 `src="images/xxx.jpg"` 換成你剛剛上傳的檔名
+### 重要：先確認資料夾分享權限
 
-### 影片怎麼放上去？
+「衛教專區」這個大資料夾，以及底下 7 個子資料夾，都要設定成 **「知道連結的任何人皆可檢視」**，同仁才打得開：
 
-**強烈建議用 YouTube，不要把影片檔直接上傳到 GitHub**（GitHub 對大檔案、影片檔案不友善，容易上傳失敗或拖慢網站）。
+1. 在 Google 雲端硬碟裡，對資料夾按右鍵（或點 **⋮** 更多選項）→ **共用**
+2. 「一般存取權」改成 **知道連結的任何人**，權限選 **檢視者**
+3. 大資料夾設定好之後，裡面的子資料夾通常會自動繼承同樣的權限；如果同仁反應打不開，就個別檢查那個子資料夾的共用設定
 
-1. 把影片上傳到 YouTube，若不想公開讓所有人在 YouTube 搜尋到，上傳時選 **「不公開／Unlisted」**（只有拿到連結的人看得到，不會出現在搜尋結果或你的頻道列表）
-2. 上傳好後，打開影片，點**分享** → 複製連結，網址長得像：
-   `https://www.youtube.com/watch?v=AbCdEfGhIjK`
-3. 把裡面 `v=` 後面那串 `AbCdEfGhIjK` 複製下來，這就是「影片 ID」
-4. 回到 `education.html`，把對應卡片裡的 `REPLACE_WITH_VIDEO_ID_1` 換成這串影片 ID 即可
+### 把每個資料夾的連結接到對應卡片
 
-### 新增一個全新的衛教主題
+1. 打開雲端硬碟，點進第一個資料夾，例如 **01衛教-外用**
+2. 點右上角 **⋮** 或分享圖示 → **共用** → 複製連結，會拿到類似：
+   `https://drive.google.com/drive/folders/1AbCdEfGhIjKlMnOp`
+3. 打開 `education.html`，找到 `ED-01` 那張卡片，把 `href="https://drive.google.com/drive/folders/REPLACE_WITH_FOLDER_01_LINK"` 換成剛剛複製的連結
+4. 依序對 **ED-02、ED-04 ~ ED-07** 重複同樣的步驟（**ED-03 例外**，見下方說明）
+5. 全部換完後 Commit 存檔
 
-複製整個 `<article class="edu-card"> … </article>` 區塊，貼在最後一個 `</article>` 後面、`</div>` (`edu-grid` 結束) 之前，修改：
-- `<span class="code">` 裡的編號（例如 `ED-04`）
+### ED-03（吸入劑）例外：直接上傳圖片顯示，不連 Google 雲端資料夾
+
+這張卡片改成跟原本「圖片＋文字」的做法一樣，直接把圖片放進 GitHub 顯示，不用連到 Google Drive：
+
+1. 把圖片檔命名為 `edu-inhaler-symbicort.jpg`（檔名只能用英文/數字，中文檔名容易在網站上讀取失敗）
+2. 到 GitHub repo → **Add file** → **Upload files**
+3. 上傳前，把檔名前面加上資料夾路徑，改成 `images/edu-inhaler-symbicort.jpg`（或先建立好 `images` 資料夾再把檔案丟進去）
+4. Commit 存檔，圖片就會自動顯示在 ED-03 卡片上
+
+如果之後想幫其他分類（ED-01、02、04~07）也改成這種「直接上傳圖片」的做法，而不是連 Google 雲端資料夾，跟我說一聲，我可以幫你把對應卡片也改成一樣的樣式。
+
+### 之後怎麼更新內容？
+
+**完全不用改網站**，直接把新的圖片或影片檔案丟進雲端硬碟對應的資料夾裡就好，卡片連結不變，同仁點進去永遠看到最新的內容。
+
+### 新增一個全新的分類卡片
+
+複製整個 `<a class="doc-card"> … </a>` 區塊，貼在最後一張卡片後面、`</div>`（`edu-grid` 結束）之前，修改：
+- `href` 換成新資料夾的連結
+- `<div class="code">` 裡的編號（例如 `ED-08`）
 - `<h3>` 標題
-- `<div class="edu-tags">` 裡的分類標籤（可增減 `<span>`）
 - `<p>` 說明文字
-- 圖片 `src`
-- 如果沒有影片，把整個 `<div class="video-wrap">…</div>` 刪掉即可，只留圖片＋文字
+
+---
+
+## 第六點五步：維護「藥品儲位查詢」（改為自助更新，不用再麻煩我）
+
+儲位查詢現在改成跟「公告事項」一樣的做法：**Google 試算表（同仁直接編輯）→ 發布成網路 CSV → 網站即時讀取顯示**。設定好一次之後，之後同仁要更新儲位，直接打開 Google 試算表改資料就好，網站會自動抓到最新內容，**完全不需要再把 Excel 傳給我**。
+
+### 1. 把資料匯入 Google 試算表
+
+1. 到 [Google 試算表](https://sheets.google.com) 建立一個新的空白試算表
+2. 點選單 **檔案 → 匯入**
+3. 選 **上傳**，把我提供的 `儲位資料_初始匯入用.csv` 這個檔案選起來
+4. 匯入位置選擇「取代目前工作表」，匯入分隔符號選「逗號」，按 **匯入資料**
+5. 匯入完成後，試算表第一列會是表頭：`藥品代碼、學名、商品名、中文名、住/急儲位、門診儲位`，下面 836 列是原本的資料
+
+**欄位順序很重要，不能調換**，網站是照欄位順序（第 1~6 欄）去讀取的。
+
+### 2. 發布成網路可讀的 CSV
+
+1. 點選單 **檔案 → 共用 → 發布到網路**
+2. 選擇要發布的工作表，格式選 **逗號分隔值檔案 (.csv)**
+3. 點 **發布**，複製產生的網址（長得像 `https://docs.google.com/spreadsheets/d/e/2PACX-xxxxxxxx/pub?output=csv`）
+
+### 3. 把網址填回網站
+
+打開 `storage.js`，找到 `REPLACE_WITH_YOUR_STORAGE_SHEET_CSV_URL`，換成剛剛複製的網址，存檔上傳。
+
+### 之後怎麼更新儲位資料？
+
+**直接打開那份 Google 試算表編輯就好**：
+- 修改某個藥品的儲位：找到那一列，改「住/急儲位」或「門診儲位」欄位的內容
+- 新增藥品：在最後面新增一列，依序填好 6 個欄位
+- 刪除藥品：直接刪除那一列
+
+存檔後網站會自動抓到最新資料（跟公告事項一樣，Google 那邊發布快取大約 1-5 分鐘更新一次，不是網站故障）。頁面上也有「重新整理」按鈕，可以手動立即重抓一次。
+
+**不需要再把 Excel 傳給我轉換了**，除非未來想要新增查詢欄位（例如加回「冷藏」欄位）或改版面，才需要再麻煩我調整程式碼。
 
 ---
 
@@ -226,6 +266,8 @@ https://forms.gle/REPLACE_WITH_YOUR_FORM_3
 pharmacy-site/
 ├── index.html       # 首頁，表單、藥品查詢入口、公告事項
 ├── education.html   # 用藥衛教區（圖片＋影片）
+├── storage.html     # 藥品儲位查詢頁
+├── storage.js       # 儲位查詢邏輯（即時讀取 Google 試算表）
 ├── styles.css       # 共用樣式
 ├── images/          # 衛教區用的圖片（自行上傳）
 └── README.md        # 本說明文件
