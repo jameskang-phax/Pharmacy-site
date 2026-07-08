@@ -8,7 +8,7 @@
    藥品代碼、學名、商品名、中文名、住／急儲位、門診儲位
    ============================================================ */
 
-var STORAGE_CSV_URL = "REPLACE_WITH_YOUR_STORAGE_SHEET_CSV_URL";
+var STORAGE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0DRKfWkfVVHV9GKEDb5bs_L3swUcdQ2UBxjRQuP8r5BZc8StPt5v8o2ni0gS6rKlWFCGoWNPeqdE/pub?output=csv";
 
 function parseCSV(text){
   var rows = [];
