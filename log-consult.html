@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>藥物諮詢紀錄預覽 · 麻豆新樓醫院藥劑科工作站</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="cross"></span>麻豆新樓醫院藥劑科工作站</a>
+    <nav class="topnav">
+      <a href="index.html#forms">表單</a>
+      <a href="https://rt01.sinlau.org.tw/sinlau/pgm/slh-out-mq/" target="_blank" rel="noopener">藥品查詢</a>
+      <a href="storage.html">儲位查詢</a>
+      <a href="education.html">衛教區</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero" style="padding-bottom:8px;">
+    <span class="eyebrow">RX-01 · CONSULT LOG</span>
+    <h1>藥物諮詢紀錄預覽</h1>
+    <p class="lede">顯示同仁透過「藥物諮詢紀錄表」填寫的內容，依時間新到舊排列，可用關鍵字搜尋。</p>
+  </section>
+
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="q" type="text" placeholder="輸入關鍵字搜尋任何欄位內容…" autocomplete="off">
+  </div>
+
+  <div class="storage-actions">
+    <span class="result-count" id="count"></span>
+    <button class="announce-refresh" id="refresh" type="button">重新整理</button>
+  </div>
+
+  <p class="announce-error" id="error" style="display:none;"></p>
+  <p class="empty-state" id="empty" style="display:none;">目前還沒有任何紀錄。</p>
+
+  <div id="list"></div>
+
+</main>
+
+<footer>
+  <div class="wrap">麻豆新樓醫院藥劑科工作站 · 紀錄內容僅供院內同仁參考</div>
+</footer>
+
+<script>
+  window.LOG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9uHVzSOhlpX8DzWpcANud6O6P2sZHtyZpohZlsIQQROXziBnJEIevlQ_qtbCAdjpmJ5onv1Sft42u/pub?output=csv";
+</script>
+<script src="log.js"></script>
+</body>
+</html>

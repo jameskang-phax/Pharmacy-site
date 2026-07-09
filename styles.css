@@ -254,6 +254,11 @@ h1{
   border-color:var(--teal);
   box-shadow:0 4px 6px rgba(28,43,39,0.08), 0 14px 30px rgba(28,43,39,0.10);
 }
+.label-card.has-log:hover{
+  transform:none;
+  border-color:var(--line);
+  box-shadow:var(--shadow);
+}
 
 .label-card .code{
   font-family:'IBM Plex Mono', monospace;
@@ -278,9 +283,22 @@ h1{
   font-size:13px;
   font-weight:700;
   color:var(--teal-dark);
+  text-decoration:none;
+  cursor:pointer;
 }
+.label-card .go:hover{ text-decoration:underline; }
 .label-card.is-alert .go{ color:var(--alert); }
 .label-card .go svg{ width:14px; height:14px; }
+
+.card-actions{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  flex-wrap:wrap;
+}
+.go-log{
+  color:var(--amber) !important;
+}
 
 .icon{
   width:34px; height:34px;
@@ -784,6 +802,44 @@ footer{
   padding:16px 0;
   background:#FBEAE9;
   border-radius:6px;
+}
+
+/* ---------- 表單填寫紀錄預覽（log-consult.html / log-pbl.html） ---------- */
+.log-item{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-left:3px solid var(--teal);
+  border-radius:6px;
+  padding:16px 18px;
+  margin-bottom:12px;
+}
+.log-date{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  color:var(--ink-soft);
+  margin-bottom:8px;
+}
+.log-fields{
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:6px 14px;
+  margin:0;
+}
+.log-fields dt{
+  font-size:12px;
+  color:var(--ink-soft);
+  padding-top:1px;
+}
+.log-fields dd{
+  margin:0;
+  font-size:14px;
+  color:var(--ink);
+  white-space:pre-wrap;
+}
+@media (max-width:520px){
+  .log-fields{ grid-template-columns:1fr; gap:2px; }
+  .log-fields dt{ font-weight:700; margin-top:8px; }
+  .log-fields dt:first-child{ margin-top:0; }
 }
 
 /* ---------- 衛教文件下載（education.html） ---------- */
