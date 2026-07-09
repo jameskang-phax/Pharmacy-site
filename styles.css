@@ -115,6 +115,12 @@ body{
 .drug-quicklink.is-storage:hover{
   background:#a86018;
 }
+.drug-quicklink.is-abnormal{
+  background:var(--alert);
+}
+.drug-quicklink.is-abnormal:hover{
+  background:#8a2e29;
+}
 
 /* ---------- Hero（單行標題） ---------- */
 .hero-simple{
