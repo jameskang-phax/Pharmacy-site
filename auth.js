@@ -14,7 +14,7 @@
    用來降低一般人誤入表單/查詢功能的機率。
    ============================================================ */
 
-var STAFF_AUTH_CSV_URL = "REPLACE_WITH_YOUR_PASSCODE_SHEET_CSV_URL";
+var STAFF_AUTH_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLWqS1Aw96H7VppVxoiVIklNzOibHqk8QnxNqgblHjrlYgHWz8ISGntSlOqyM-nZZ4NWmrk2HGhCCN/pub?output=csv";
 var STAFF_AUTH_STORAGE_KEY = "pharmacy-staff-authed";
 var ROLE_PICKED_STORAGE_KEY = "pharmacy-role-picked";
 
