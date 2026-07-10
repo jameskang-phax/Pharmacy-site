@@ -16,6 +16,7 @@
 
 var STAFF_AUTH_CSV_URL = "REPLACE_WITH_YOUR_PASSCODE_SHEET_CSV_URL";
 var STAFF_AUTH_STORAGE_KEY = "pharmacy-staff-authed";
+var ROLE_PICKED_STORAGE_KEY = "pharmacy-role-picked";
 
 function isStaffAuthed(){
   try{
@@ -29,6 +30,14 @@ function setStaffAuthed(){
   try{ localStorage.setItem(STAFF_AUTH_STORAGE_KEY, "yes"); }catch(e){}
 }
 
+function hasPickedRole(){
+  try{ return !!localStorage.getItem(ROLE_PICKED_STORAGE_KEY); }catch(e){ return false; }
+}
+
+function setPickedRole(role){
+  try{ localStorage.setItem(ROLE_PICKED_STORAGE_KEY, role); }catch(e){}
+}
+
 function fetchCurrentPasscode(){
   return fetch(STAFF_AUTH_CSV_URL + (STAFF_AUTH_CSV_URL.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now())
     .then(function(res){
@@ -36,67 +45,85 @@ function fetchCurrentPasscode(){
       return res.text();
     })
     .then(function(text){
-      // 只取第一格內容，去除換行、引號、空白
       var first = text.split(/\r?\n/)[0] || '';
       return first.replace(/^"|"$/g, '').trim();
     });
 }
 
+/* 通行碼輸入畫面：先顯示「僅供員工使用」提示，按鈕後才出現輸入框 */
 function buildAuthOverlay(onSuccess){
   var overlay = document.createElement('div');
   overlay.className = 'staff-auth-overlay';
-  overlay.innerHTML =
-    '<div class="staff-auth-box">' +
-      '<div class="staff-auth-icon">🔒</div>' +
-      '<h2>員工專用區</h2>' +
-      '<p>這個頁面僅供院內同仁使用，請輸入通行碼。</p>' +
-      '<input type="password" id="staff-auth-input" placeholder="請輸入通行碼" autocomplete="off">' +
-      '<button type="button" id="staff-auth-submit">進入</button>' +
-      '<p class="staff-auth-error" id="staff-auth-error" style="display:none;">通行碼錯誤，請再試一次。</p>' +
-      '<a href="index.html" class="staff-auth-back">返回首頁</a>' +
-    '</div>';
-  document.body.appendChild(overlay);
 
-  var input = document.getElementById('staff-auth-input');
-  var submitBtn = document.getElementById('staff-auth-submit');
-  var errorEl = document.getElementById('staff-auth-error');
-
-  function trySubmit(){
-    var val = input.value.trim();
-    if(!val) return;
-    submitBtn.disabled = true;
-    submitBtn.textContent = '確認中…';
-    fetchCurrentPasscode().then(function(correctCode){
-      submitBtn.disabled = false;
-      submitBtn.textContent = '進入';
-      if(!correctCode || correctCode.indexOf('REPLACE_WITH') === 0){
-        errorEl.textContent = '尚未設定通行碼，請聯絡管理者完成設定。';
-        errorEl.style.display = 'block';
-        return;
-      }
-      if(val === correctCode){
-        setStaffAuthed();
-        overlay.remove();
-        onSuccess();
-      }else{
-        errorEl.textContent = '通行碼錯誤，請再試一次。';
-        errorEl.style.display = 'block';
-        input.value = '';
-        input.focus();
-      }
-    }).catch(function(){
-      submitBtn.disabled = false;
-      submitBtn.textContent = '進入';
-      errorEl.textContent = '無法連線驗證，請確認網路連線後再試一次。';
-      errorEl.style.display = 'block';
-    });
+  function renderPrompt(){
+    overlay.innerHTML =
+      '<div class="staff-auth-box">' +
+        '<div class="staff-auth-icon">🔒</div>' +
+        '<h2>僅供員工使用</h2>' +
+        '<p>這個功能僅供院內同仁使用，請以員工身分登入。</p>' +
+        '<button type="button" id="staff-auth-goto-login">員工登入</button>' +
+        '<a href="index.html" class="staff-auth-back">返回首頁</a>' +
+      '</div>';
+    document.getElementById('staff-auth-goto-login').addEventListener('click', renderLoginForm);
   }
 
-  submitBtn.addEventListener('click', trySubmit);
-  input.addEventListener('keydown', function(e){
-    if(e.key === 'Enter') trySubmit();
-  });
-  setTimeout(function(){ input.focus(); }, 100);
+  function renderLoginForm(){
+    overlay.innerHTML =
+      '<div class="staff-auth-box">' +
+        '<div class="staff-auth-icon">🔑</div>' +
+        '<h2>員工登入</h2>' +
+        '<p>請輸入通行碼（格式：R + 身分證後 4 碼）</p>' +
+        '<input type="password" id="staff-auth-input" placeholder="例如：R1234" autocomplete="off">' +
+        '<button type="button" id="staff-auth-submit">進入</button>' +
+        '<p class="staff-auth-error" id="staff-auth-error" style="display:none;"></p>' +
+        '<a href="index.html" class="staff-auth-back">返回首頁</a>' +
+      '</div>';
+
+    var input = document.getElementById('staff-auth-input');
+    var submitBtn = document.getElementById('staff-auth-submit');
+    var errorEl = document.getElementById('staff-auth-error');
+
+    function trySubmit(){
+      var val = input.value.trim();
+      if(!val) return;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '確認中…';
+      fetchCurrentPasscode().then(function(correctCode){
+        submitBtn.disabled = false;
+        submitBtn.textContent = '進入';
+        if(!correctCode || correctCode.indexOf('REPLACE_WITH') === 0){
+          errorEl.textContent = '尚未設定通行碼，請聯絡管理者完成設定。';
+          errorEl.style.display = 'block';
+          return;
+        }
+        if(val === correctCode){
+          setStaffAuthed();
+          setPickedRole('staff');
+          overlay.remove();
+          onSuccess();
+        }else{
+          errorEl.textContent = '通行碼錯誤，請再試一次。';
+          errorEl.style.display = 'block';
+          input.value = '';
+          input.focus();
+        }
+      }).catch(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = '進入';
+        errorEl.textContent = '無法連線驗證，請確認網路連線後再試一次。';
+        errorEl.style.display = 'block';
+      });
+    }
+
+    submitBtn.addEventListener('click', trySubmit);
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter') trySubmit();
+    });
+    setTimeout(function(){ input.focus(); }, 100);
+  }
+
+  document.body.appendChild(overlay);
+  renderPrompt();
 }
 
 function requireStaffAuth(onSuccess){
@@ -107,29 +134,24 @@ function requireStaffAuth(onSuccess){
   buildAuthOverlay(onSuccess);
 }
 
-/* ============================================================
-   進站選擇畫面：一打開網站就先問「訪客／員工」
-   - 已經登入過的員工（localStorage 有記錄）→ 直接略過，不打擾
-   - 選「訪客」→ 關閉畫面，正常瀏覽（各項功能仍會個別要求通行碼）
-   - 選「員工」→ 直接跳出通行碼輸入框
-   ============================================================ */
+/* 進站身分選擇（訪客／員工），只在首頁呼叫一次；選過就不再問 */
 function showEntryGate(){
-  if(isStaffAuthed()) return;
+  if(isStaffAuthed() || hasPickedRole()) return;
 
   var overlay = document.createElement('div');
   overlay.className = 'staff-auth-overlay';
-  overlay.id = 'entry-gate-overlay';
   overlay.innerHTML =
     '<div class="staff-auth-box">' +
-      '<div class="staff-auth-icon">🏥</div>' +
+      '<div class="staff-auth-icon">👋</div>' +
       '<h2>歡迎使用</h2>' +
-      '<p>請選擇您的身分，以便顯示合適的內容。</p>' +
-      '<button type="button" id="entry-staff-btn">我是員工，要登入</button>' +
-      '<button type="button" id="entry-visitor-btn" class="staff-auth-secondary-btn">我是訪客，僅瀏覽</button>' +
+      '<p>請選擇您的身分，訪客僅能瀏覽首頁與衛教區，員工可使用完整功能。</p>' +
+      '<button type="button" id="entry-staff-btn">🔑 我是員工</button>' +
+      '<button type="button" id="entry-visitor-btn" class="staff-auth-secondary-btn">👁 我是訪客（僅瀏覽）</button>' +
     '</div>';
   document.body.appendChild(overlay);
 
   document.getElementById('entry-visitor-btn').addEventListener('click', function(){
+    setPickedRole('guest');
     overlay.remove();
   });
   document.getElementById('entry-staff-btn').addEventListener('click', function(){
@@ -137,49 +159,3 @@ function showEntryGate(){
     requireStaffAuth(function(){});
   });
 }
-
-/* ============================================================
-   進站身分選擇（訪客／員工）
-   ------------------------------------------------------------
-   在公開頁面（首頁、衛教區）載入時顯示一次，讓使用者一開始
-   就選擇自己的身分。選「員工」會直接接著跳出通行碼輸入。
-   同一台裝置選過一次之後，這次瀏覽期間（分頁還開著）不會再問。
-   ============================================================ */
-
-var ROLE_SESSION_KEY = "pharmacy-role-picked";
-
-function buildRoleGateOverlay(){
-  var overlay = document.createElement('div');
-  overlay.className = 'staff-auth-overlay';
-  overlay.id = 'role-gate-overlay';
-  overlay.innerHTML =
-    '<div class="staff-auth-box role-gate-box">' +
-      '<div class="staff-auth-icon">👋</div>' +
-      '<h2>歡迎使用</h2>' +
-      '<p>請選擇您的身分，訪客僅能瀏覽首頁與衛教區，員工可使用完整功能。</p>' +
-      '<button type="button" class="role-btn role-btn-staff" id="role-btn-staff">🔑 我是員工</button>' +
-      '<button type="button" class="role-btn role-btn-guest" id="role-btn-guest">👁 我是訪客（僅瀏覽）</button>' +
-    '</div>';
-  document.body.appendChild(overlay);
-
-  document.getElementById('role-btn-guest').addEventListener('click', function(){
-    try{ sessionStorage.setItem(ROLE_SESSION_KEY, 'guest'); }catch(e){}
-    overlay.remove();
-  });
-
-  document.getElementById('role-btn-staff').addEventListener('click', function(){
-    try{ sessionStorage.setItem(ROLE_SESSION_KEY, 'staff'); }catch(e){}
-    overlay.remove();
-    requireStaffAuth(function(){ /* 驗證通過即可，畫面本來就看得到公開內容 */ });
-  });
-}
-
-function initRoleGate(){
-  if(isStaffAuthed()) return; // 已經是驗證過的員工，不用再問
-  try{
-    if(sessionStorage.getItem(ROLE_SESSION_KEY)) return; // 這次瀏覽已經選過
-  }catch(e){}
-  buildRoleGateOverlay();
-}
-
-document.addEventListener('DOMContentLoaded', initRoleGate);
