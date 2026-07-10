@@ -12,15 +12,15 @@
   <div class="wrap">
     <a class="brand" href="index.html"><span class="cross"></span>麻豆新樓醫院藥劑科工作站</a>
     <div class="header-actions">
-      <a class="drug-quicklink" href="https://rt01.sinlau.org.tw/sinlau/pgm/slh-out-mq/" target="_blank" rel="noopener">
+      <a class="drug-quicklink" id="btn-drug-lookup" href="https://rt01.sinlau.org.tw/sinlau/pgm/slh-out-mq/" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         藥品查詢
       </a>
-      <a class="drug-quicklink is-storage" href="storage.html">
+      <a class="drug-quicklink is-storage" id="btn-storage" href="storage.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>
         儲位查詢
       </a>
-      <a class="drug-quicklink is-abnormal" href="abnormal.html">
+      <a class="drug-quicklink is-abnormal" id="btn-abnormal" href="abnormal.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 2.9 17a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
         現場作業Q&A
       </a>
@@ -43,7 +43,7 @@
 
     <!-- ============ 兩個方塊：科內表單／衛教專區 ============ -->
     <div class="tile-row">
-      <button class="tile tile-forms" type="button" data-target="panel-forms" aria-expanded="false">
+      <button class="tile tile-forms" type="button" data-target="panel-forms" aria-expanded="false" data-requires-auth="true">
         <span class="tile-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </span>
@@ -173,19 +173,48 @@
   <div class="wrap">麻豆新樓醫院藥劑科工作站 · 內部使用 · 若表單涉及病人資料，請先確認符合院內個資規範</div>
 </footer>
 
+<script src="auth.js"></script>
+<script>
+showEntryGate();
+</script>
 <script>
 document.querySelectorAll('.tile').forEach(function(tile){
   tile.addEventListener('click', function(){
-    var targetId = tile.getAttribute('data-target');
-    var panel = document.getElementById(targetId);
-    var isOpen = panel.classList.contains('is-open');
-    document.querySelectorAll('.tile-panel').forEach(function(p){ p.classList.remove('is-open'); });
-    document.querySelectorAll('.tile').forEach(function(t){ t.setAttribute('aria-expanded','false'); t.classList.remove('is-active'); });
-    if(!isOpen){
-      panel.classList.add('is-open');
-      tile.setAttribute('aria-expanded','true');
-      tile.classList.add('is-active');
+    function openThisPanel(){
+      var targetId = tile.getAttribute('data-target');
+      var panel = document.getElementById(targetId);
+      var isOpen = panel.classList.contains('is-open');
+      document.querySelectorAll('.tile-panel').forEach(function(p){ p.classList.remove('is-open'); });
+      document.querySelectorAll('.tile').forEach(function(t){ t.setAttribute('aria-expanded','false'); t.classList.remove('is-active'); });
+      if(!isOpen){
+        panel.classList.add('is-open');
+        tile.setAttribute('aria-expanded','true');
+        tile.classList.add('is-active');
+      }
     }
+    if(tile.getAttribute('data-requires-auth') === 'true'){
+      requireStaffAuth(openThisPanel);
+    }else{
+      openThisPanel();
+    }
+  });
+});
+
+/* 頂部三個快捷按鈕（藥品查詢／儲位查詢／現場作業Q&A）都需要通行碼 */
+['btn-drug-lookup','btn-storage','btn-abnormal'].forEach(function(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('click', function(e){
+    e.preventDefault();
+    var href = el.getAttribute('href');
+    var target = el.getAttribute('target');
+    requireStaffAuth(function(){
+      if(target === '_blank'){
+        window.open(href, '_blank', 'noopener');
+      }else{
+        window.location.href = href;
+      }
+    });
   });
 });
 
