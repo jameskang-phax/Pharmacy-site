@@ -34,7 +34,10 @@
     <section class="hero-simple">
       <div class="hero-row">
         <h1><span class="hero-hospital">麻豆新樓醫院</span><span class="hero-dept">藥劑科工作站</span></h1>
-        <div class="visit-counter">累計瀏覽人次：<img src="https://visitor-badge.laobi.icu/badge?page_id=sinlau-pharmacy-jameskang-phax&left_color=transparent&right_color=transparent&left_text=" alt="瀏覽人次" style="height:16px;vertical-align:middle;"></div>
+        <div class="visit-counter">
+          <span>累計瀏覽人次</span>
+          <span class="visit-count-badge" id="visit-count">…</span>
+        </div>
       </div>
     </section>
 
@@ -325,6 +328,15 @@ function loadAnnouncements(){
 
 document.getElementById('announce-refresh').addEventListener('click', loadAnnouncements);
 loadAnnouncements();
+
+fetch('https://abacus.jasoncameron.dev/hit/sinlau-pharmacy-jameskang-phax/total-visits')
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    document.getElementById('visit-count').textContent = data.value;
+  })
+  .catch(function(){
+    document.getElementById('visit-count').textContent = '—';
+  });
 </script>
 
 </body>
