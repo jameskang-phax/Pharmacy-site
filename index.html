@@ -152,7 +152,7 @@
       </div>
 
       <div class="announce-actions">
-        <a class="announce-add-btn" href="https://forms.gle/1MQVjZCX9XzRmV8VA" target="_blank" rel="noopener">
+        <a class="announce-add-btn" href="https://forms.gle/kUX38uAgRRcqjGCy5" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           新增公告
         </a>
@@ -278,12 +278,13 @@ function renderAnnouncements(rows){
   var toggleWrap = document.getElementById('announce-toggle-wrap');
   errorEl.style.display = 'none';
 
-  // 第一列是表頭：時間戳記／公告標題／公告內容／是否置頂
+  // 第一列是表頭：時間戳記／公告標題／公告內容／是否置頂／附件檔案
   var dataRows = rows.slice(1);
   var items = dataRows.map(function(r){
     var pinRaw = (r[3] || '').trim();
     var isPinned = pinRaw === '是' || pinRaw.toLowerCase() === 'yes' || pinRaw.toLowerCase() === 'true';
-    return { ts: r[0] || '', title: r[1] || '', body: r[2] || '', pinned: isPinned };
+    var attachmentRaw = (r[4] || '').trim();
+    return { ts: r[0] || '', title: r[1] || '', body: r[2] || '', pinned: isPinned, attachment: attachmentRaw };
   }).filter(function(item){ return item.title.trim() !== ''; });
 
   items.sort(function(a,b){
@@ -303,12 +304,24 @@ function renderAnnouncements(rows){
   var visibleItems = items.slice(0, LIMIT);
   var hiddenItems = items.slice(LIMIT);
 
+  function attachmentHtml(attachment){
+    if(!attachment) return '';
+    var links = attachment.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s !== ''; });
+    if(links.length === 0) return '';
+    var linksHtml = links.map(function(url, i){
+      var label = links.length > 1 ? ('📎 附件 ' + (i + 1)) : '📎 查看附件';
+      return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="announce-attachment">' + label + '</a>';
+    }).join('');
+    return '<div class="announce-attachments">' + linksHtml + '</div>';
+  }
+
   function itemHtml(item){
     return '<div class="announce-item' + (item.pinned ? ' is-pinned' : '') + '">' +
       (item.pinned ? '<span class="announce-pin-badge">📌 置頂</span>' : '') +
       '<div class="announce-date">' + formatTimestamp(item.ts) + '</div>' +
       '<div class="announce-title">' + escapeHtml(item.title) + '</div>' +
       (item.body ? '<div class="announce-body">' + escapeHtml(item.body) + '</div>' : '') +
+      attachmentHtml(item.attachment) +
     '</div>';
   }
 

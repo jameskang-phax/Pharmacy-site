@@ -880,6 +880,28 @@ footer{
   padding:2px 9px;
   margin-bottom:6px;
 }
+.announce-attachments{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.announce-attachment{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--teal-dark);
+  background:var(--amber-soft);
+  border:1px solid var(--amber);
+  border-radius:6px;
+  padding:5px 10px;
+  text-decoration:none;
+}
+.announce-attachment:hover{
+  background:#fff;
+}
 .announce-date{
   font-family:'IBM Plex Mono', monospace;
   font-size:11px;
