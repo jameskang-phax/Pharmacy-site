@@ -1035,6 +1035,18 @@ footer{
   transition:transform .15s ease;
 }
 .doc-card:hover{ transform:translateY(-2px); }
+button.doc-card{
+  width:100%;
+  font-family:inherit;
+  font-size:inherit;
+  cursor:pointer;
+}
+.edu-collection{
+  display:flex;
+  flex-direction:column;
+  gap:28px;
+  margin-top:28px;
+}
 .doc-card .icon{
   width:50px; height:50px;
   border-radius:12px;

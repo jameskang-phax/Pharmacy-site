@@ -66,18 +66,31 @@
       </span>
     </a>
 
+    <button type="button" class="doc-card inhaler-toggle" id="inhaler-toggle-btn">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="body">
+        <div class="code">ED-03</div>
+        <h3>衛教－吸入劑</h3>
+        <p>COPD、氣喘等各類吸入劑正確使用步驟衛教圖卡，共 12 項藥品。</p>
+      </div>
+      <span class="go" id="inhaler-toggle-label">開啟資料夾
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </span>
+    </button>
+
+    <div class="edu-collection" id="inhaler-collection" style="display:none;">
+
     <article class="edu-card">
       <div class="edu-media">
         <img src="images/edu-inhaler-symbicort.jpg" alt="Symbicort Turbuhaler 吸入劑正確使用步驟圖卡">
       </div>
       <div class="edu-body">
-        <span class="code">ED-03</span>
+        <span class="code">INH-005</span>
         <h3>衛教－吸入劑（Symbicort Turbuhaler）</h3>
         <div class="edu-tags"><span>氣喘</span><span>支氣管</span></div>
         <p>都保定量粉狀吸入劑正確使用四步驟：轉開瓶蓋、來回轉紅底上藥、對空吐氣、深吸閉氣 5 秒，使用完需漱口。</p>
-        <a class="go" href="https://drive.google.com/drive/folders/173JydNBduK6glEObpYmXbdUJkDpJ3KkK?usp=drive_link" target="_blank" rel="noopener">查看更多吸入劑衛教資料
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
       </div>
     </article>
 
@@ -201,7 +214,9 @@
       </div>
     </article>
 
+    </div>
 
+    <article class="edu-card">
       <div class="edu-media">
         <img src="images/edu-pediatric-zithromax.jpg" alt="日舒懸浮用粉兒童用藥調配衛教圖卡">
       </div>
@@ -273,6 +288,20 @@ document.getElementById('edu-btn-drug-lookup').addEventListener('click', functio
   requireStaffAuth(function(){
     window.open(href, '_blank', 'noopener');
   });
+});
+
+document.getElementById('inhaler-toggle-btn').addEventListener('click', function(){
+  var collection = document.getElementById('inhaler-collection');
+  var label = document.getElementById('inhaler-toggle-label');
+  var isOpen = collection.style.display !== 'none';
+  if(isOpen){
+    collection.style.display = 'none';
+    label.innerHTML = '開啟資料夾 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
+  }else{
+    collection.style.display = 'flex';
+    label.innerHTML = '收合資料夾 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>';
+    collection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 });
 </script>
 
