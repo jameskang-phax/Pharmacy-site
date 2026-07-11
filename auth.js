@@ -16,6 +16,7 @@
 
 var STAFF_AUTH_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLWqS1Aw96H7VppVxoiVIklNzOibHqk8QnxNqgblHjrlYgHWz8ISGntSlOqyM-nZZ4NWmrk2HGhCCN/pub?output=csv";
 var STAFF_AUTH_STORAGE_KEY = "pharmacy-staff-authed";
+var STAFF_NAME_STORAGE_KEY = "pharmacy-staff-name";
 var ROLE_PICKED_STORAGE_KEY = "pharmacy-role-picked";
 
 function isStaffAuthed(){
@@ -30,6 +31,14 @@ function setStaffAuthed(){
   try{ localStorage.setItem(STAFF_AUTH_STORAGE_KEY, "yes"); }catch(e){}
 }
 
+function getStaffName(){
+  try{ return localStorage.getItem(STAFF_NAME_STORAGE_KEY) || ''; }catch(e){ return ''; }
+}
+
+function setStaffName(name){
+  try{ localStorage.setItem(STAFF_NAME_STORAGE_KEY, name); }catch(e){}
+}
+
 function hasPickedRole(){
   try{ return !!localStorage.getItem(ROLE_PICKED_STORAGE_KEY); }catch(e){ return false; }
 }
@@ -38,16 +47,61 @@ function setPickedRole(role){
   try{ localStorage.setItem(ROLE_PICKED_STORAGE_KEY, role); }catch(e){}
 }
 
-function fetchCurrentPasscode(){
+function parseAuthCSV(text){
+  var rows = [];
+  var row = [];
+  var field = '';
+  var inQuotes = false;
+  for(var i = 0; i < text.length; i++){
+    var c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else{ inQuotes = false; }
+      }else{
+        field += c;
+      }
+    }else{
+      if(c === '"'){ inQuotes = true; }
+      else if(c === ','){ row.push(field); field = ''; }
+      else if(c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+      else if(c === '\r'){ /* skip */ }
+      else{ field += c; }
+    }
+  }
+  if(field.length > 0 || row.length > 0){ row.push(field); rows.push(row); }
+  return rows.filter(function(r){ return r.some(function(cell){ return cell.trim() !== ''; }); });
+}
+
+/* 抓取「通行碼對照表」：A 欄＝密碼，B 欄＝姓名，可以有很多列（多組通行碼） */
+function fetchStaffList(){
   return fetch(STAFF_AUTH_CSV_URL + (STAFF_AUTH_CSV_URL.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now())
     .then(function(res){
       if(!res.ok) throw new Error('network');
       return res.text();
     })
     .then(function(text){
-      var first = text.split(/\r?\n/)[0] || '';
-      return first.replace(/^"|"$/g, '').trim();
+      var rows = parseAuthCSV(text);
+      return rows.map(function(r){
+        return {
+          code: (r[0] || '').trim(),
+          name: (r[1] || '').trim()
+        };
+      }).filter(function(r){ return r.code !== ''; });
     });
+}
+
+/* 頁面上顯示「XXX 您好」的小標籤，找得到 #staff-greeting-slot 才會顯示 */
+function renderStaffGreeting(){
+  var slot = document.getElementById('staff-greeting-slot');
+  if(!slot) return;
+  var name = getStaffName();
+  if(name && isStaffAuthed()){
+    slot.textContent = name + ' 您好';
+    slot.style.display = 'inline-flex';
+  }else{
+    slot.style.display = 'none';
+  }
 }
 
 /* 通行碼輸入畫面：先顯示「僅供員工使用」提示，按鈕後才出現輸入框 */
@@ -88,17 +142,20 @@ function buildAuthOverlay(onSuccess){
       if(!val) return;
       submitBtn.disabled = true;
       submitBtn.textContent = '確認中…';
-      fetchCurrentPasscode().then(function(correctCode){
+      fetchStaffList().then(function(list){
         submitBtn.disabled = false;
         submitBtn.textContent = '進入';
-        if(!correctCode || correctCode.indexOf('REPLACE_WITH') === 0){
+        if(!list || list.length === 0){
           errorEl.textContent = '尚未設定通行碼，請聯絡管理者完成設定。';
           errorEl.style.display = 'block';
           return;
         }
-        if(val === correctCode){
+        var matched = list.filter(function(item){ return item.code === val; })[0];
+        if(matched){
           setStaffAuthed();
           setPickedRole('staff');
+          setStaffName(matched.name || '');
+          renderStaffGreeting();
           overlay.remove();
           onSuccess();
         }else{
@@ -159,3 +216,5 @@ function showEntryGate(){
     requireStaffAuth(function(){});
   });
 }
+
+document.addEventListener('DOMContentLoaded', renderStaffGreeting);

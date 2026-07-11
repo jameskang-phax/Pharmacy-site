@@ -50,6 +50,17 @@ body{
   height:64px;
   gap:12px;
 }
+.staff-greeting{
+  display:inline-flex;
+  align-items:center;
+  font-size:12px;
+  font-weight:700;
+  color:var(--teal-dark);
+  background:var(--amber-soft);
+  padding:4px 12px;
+  border-radius:999px;
+  white-space:nowrap;
+}
 @media (max-width:640px){
   .topbar .wrap{ height:auto; padding-top:12px; padding-bottom:12px; flex-wrap:wrap; }
   .brand{ font-size:14px; }

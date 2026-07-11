@@ -11,6 +11,7 @@
 <header class="topbar">
   <div class="wrap">
     <a class="brand" href="index.html"><span class="cross"></span>麻豆新樓醫院藥劑科工作站</a>
+    <span id="staff-greeting-slot" class="staff-greeting" style="display:none;"></span>
     <div class="header-actions">
       <a class="drug-quicklink" href="https://rt01.sinlau.org.tw/sinlau/pgm/slh-out-mq/" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -28,7 +29,7 @@
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap" id="page-content" style="display:none;">
 
   <section class="hero" style="padding-bottom:8px;">
     <span class="eyebrow">EVT-01 · INCIDENT LOG</span>
@@ -61,12 +62,17 @@
 </main>
 
 <footer>
-  <div class="wrap">麻豆新樓醫院藥劑科工作站 · 紀錄內容僅供院內同仁參考</div>
-</footer>
+  <div class="wrap">麻豆新樓醫院藥劑科工作站 · 紀錄內容僅供院內同仁參考</div></footer>
 
 <script>
   window.LOG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRG8Xost3i2u93DOYG6j3v3sCaPuaEI3GSo7uP0ZAuhkp7-R1q4ni7HdsIIrgfe2mNdHFochhegs7s6/pub?output=csv";
 </script>
+<script src="auth.js"></script>
 <script src="log.js"></script>
+<script>
+  requireStaffAuth(function(){
+    document.getElementById("page-content").style.display = "block";
+  });
+</script>
 </body>
 </html>

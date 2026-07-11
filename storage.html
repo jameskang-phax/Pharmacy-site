@@ -11,6 +11,7 @@
 <header class="topbar">
   <div class="wrap">
     <a class="brand" href="index.html"><span class="cross"></span>麻豆新樓醫院藥劑科工作站</a>
+    <span id="staff-greeting-slot" class="staff-greeting" style="display:none;"></span>
     <nav class="topnav">
       <a href="index.html#forms">表單</a>
       <a href="https://rt01.sinlau.org.tw/sinlau/pgm/slh-out-mq/" target="_blank" rel="noopener">藥品查詢</a>
@@ -21,7 +22,7 @@
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap" id="page-content" style="display:none;">
 
   <section class="hero" style="padding-bottom:8px;">
     <span class="eyebrow">LOC-01 · STORAGE LOOKUP</span>
@@ -46,9 +47,14 @@
 </main>
 
 <footer>
-  <div class="wrap">麻豆新樓醫院藥劑科工作站 · 儲位資料僅供院內同仁參考，實際擺放位置請以現場標示為準</div>
-</footer>
+  <div class="wrap">麻豆新樓醫院藥劑科工作站 · 儲位資料僅供院內同仁參考，實際擺放位置請以現場標示為準</div></footer>
 
+<script src="auth.js"></script>
 <script src="storage.js"></script>
+<script>
+  requireStaffAuth(function(){
+    document.getElementById('page-content').style.display = 'block';
+  });
+</script>
 </body>
 </html>
