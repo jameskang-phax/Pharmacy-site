@@ -42,6 +42,21 @@ function escapeLogHtml(str){
 var LOG_HEADERS = [];
 var LOG_ITEMS = [];
 
+function formatLogValue(value){
+  var trimmed = value.trim();
+  // 如果整個欄位是一個或多個網址（Google表單檔案上傳題會存成網址），
+  // 就顯示成可點擊的附件連結，而不是純文字網址
+  var parts = trimmed.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s !== ''; });
+  var allUrls = parts.length > 0 && parts.every(function(p){ return /^https?:\/\//i.test(p); });
+  if(allUrls){
+    return parts.map(function(url, i){
+      var label = parts.length > 1 ? ('📎 附件 ' + (i + 1)) : '📎 查看附件';
+      return '<a href="' + escapeLogHtml(url) + '" target="_blank" rel="noopener" class="log-attachment">' + label + '</a>';
+    }).join(' ');
+  }
+  return escapeLogHtml(value);
+}
+
 function renderLogList(items){
   var list = document.getElementById("list");
   var count = document.getElementById("count");
@@ -60,7 +75,7 @@ function renderLogList(items){
     var fieldsHtml = item.fields
       .filter(function(f){ return f.value && f.value.trim() !== ''; })
       .map(function(f){
-        return '<dt>' + escapeLogHtml(f.label) + '</dt><dd>' + escapeLogHtml(f.value) + '</dd>';
+        return '<dt>' + escapeLogHtml(f.label) + '</dt><dd>' + formatLogValue(f.value) + '</dd>';
       }).join('');
     return '<div class="log-item">' +
       '<div class="log-date">' + escapeLogHtml(item.ts) + '</div>' +

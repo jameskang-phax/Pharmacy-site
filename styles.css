@@ -994,6 +994,23 @@ footer{
   color:var(--ink);
   white-space:pre-wrap;
 }
+.log-attachment{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--teal-dark);
+  background:var(--amber-soft);
+  border:1px solid var(--amber);
+  border-radius:6px;
+  padding:4px 9px;
+  text-decoration:none;
+  margin-right:6px;
+}
+.log-attachment:hover{
+  background:#fff;
+}
 @media (max-width:520px){
   .log-fields{ grid-template-columns:1fr; gap:2px; }
   .log-fields dt{ font-weight:700; margin-top:8px; }
