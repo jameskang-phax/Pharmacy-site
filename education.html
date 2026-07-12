@@ -27,26 +27,29 @@
   <section class="hero" style="padding-bottom:8px;">
     <span class="eyebrow">ED · PATIENT EDUCATION</span>
     <h1>用藥衛教區</h1>
-    <p class="lede">給病人與家屬看的衛教圖片與影片，也可以在諮詢櫃檯播放給同仁參考。點分類卡片即可展開／收合內容。</p>
+    <p class="lede">給病人與家屬看的衛教圖片與影片，也可以在諮詢櫃檯播放給同仁參考。點下方任一主題方塊查看完整內容，內容頁上方可點「返回」回到主題列表。</p>
   </section>
 
-  <div class="edu-grid">
+  <button type="button" class="edu-back-btn" id="edu-back-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    返回衛教主題卡片
+  </button>
+
+  <div class="edu-grid" id="edu-tile-grid">
 
     <!-- ED-01 外用 -->
-    <button type="button" class="doc-card edu-toggle-btn" data-target="panel-ED01">
+    <button type="button" class="edu-tile edu-toggle-btn" data-target="panel-ED01">
       <div class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       </div>
-      <div class="body">
-        <div class="code">ED-01</div>
-        <h3>衛教－外用</h3>
-        <p>外用藥品（藥膏、貼片、噴劑等）的正確使用方式衛教圖卡。</p>
-      </div>
-      <span class="go">開啟資料夾
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </span>
+      <div class="code">ED-01</div>
+      <h3>衛教－外用</h3>
     </button>
     <div class="edu-collection" id="panel-ED01" style="display:none;">
+      <div class="edu-collection-intro">
+        <h2>衛教－外用</h2>
+        <p>外用藥品（藥膏、貼片、噴劑等）的正確使用方式衛教圖卡。</p>
+      </div>
 
       <article class="edu-card">
         <div class="edu-media">
@@ -112,20 +115,18 @@
     </div>
 
     <!-- ED-02 筆型胰島素 -->
-    <button type="button" class="doc-card edu-toggle-btn" data-target="panel-ED02">
+    <button type="button" class="edu-tile edu-toggle-btn" data-target="panel-ED02">
       <div class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       </div>
-      <div class="body">
-        <div class="code">ED-02</div>
-        <h3>衛教－筆型胰島素</h3>
-        <p>筆型胰島素的注射步驟、部位輪替與保存方式衛教圖卡。</p>
-      </div>
-      <span class="go">開啟資料夾
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </span>
+      <div class="code">ED-02</div>
+      <h3>衛教－筆型胰島素</h3>
     </button>
     <div class="edu-collection" id="panel-ED02" style="display:none;">
+      <div class="edu-collection-intro">
+        <h2>衛教－筆型胰島素</h2>
+        <p>筆型胰島素的注射步驟、部位輪替與保存方式衛教圖卡。</p>
+      </div>
 
       <article class="edu-card">
         <div class="edu-media">
@@ -263,20 +264,18 @@
     </div>
 
     <!-- ED-03 吸入劑（12 項，圖片直接顯示在展開內容裡） -->
-    <button type="button" class="doc-card edu-toggle-btn" data-target="panel-ED03">
+    <button type="button" class="edu-tile edu-toggle-btn" data-target="panel-ED03">
       <div class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       </div>
-      <div class="body">
-        <div class="code">ED-03</div>
-        <h3>衛教－吸入劑</h3>
-        <p>COPD、氣喘等各類吸入劑正確使用步驟衛教圖卡，共 12 項藥品。</p>
-      </div>
-      <span class="go">開啟資料夾
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </span>
+      <div class="code">ED-03</div>
+      <h3>衛教－吸入劑</h3>
     </button>
     <div class="edu-collection" id="panel-ED03" style="display:none;">
+      <div class="edu-collection-intro">
+        <h2>衛教－吸入劑</h2>
+        <p>COPD、氣喘等各類吸入劑正確使用步驟衛教圖卡，共 12 項藥品。</p>
+      </div>
 
       <article class="edu-card">
         <div class="edu-media">
@@ -413,20 +412,18 @@
     </div>
 
     <!-- ED-04 兒童用藥 -->
-    <button type="button" class="doc-card edu-toggle-btn" data-target="panel-ED04">
+    <button type="button" class="edu-tile edu-toggle-btn" data-target="panel-ED04">
       <div class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       </div>
-      <div class="body">
-        <div class="code">ED-04</div>
-        <h3>衛教－兒童用藥</h3>
-        <p>兒童劑量換算、餵藥方式與注意事項衛教圖卡。</p>
-      </div>
-      <span class="go">開啟資料夾
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </span>
+      <div class="code">ED-04</div>
+      <h3>衛教－兒童用藥</h3>
     </button>
     <div class="edu-collection" id="panel-ED04" style="display:none;">
+      <div class="edu-collection-intro">
+        <h2>衛教－兒童用藥</h2>
+        <p>兒童劑量換算、餵藥方式與注意事項衛教圖卡。</p>
+      </div>
       <article class="edu-card">
         <div class="edu-media">
           <img src="images/edu-pediatric-zithromax.jpg" alt="日舒懸浮用粉兒童用藥調配衛教圖卡">
@@ -455,20 +452,18 @@
     </div>
 
     <!-- ED-05 一般藥品 -->
-    <button type="button" class="doc-card edu-toggle-btn" data-target="panel-ED05">
+    <button type="button" class="edu-tile edu-toggle-btn" data-target="panel-ED05">
       <div class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       </div>
-      <div class="body">
-        <div class="code">ED-05</div>
-        <h3>衛教－一般藥品</h3>
-        <p>常見口服藥品的服用方式、副作用與注意事項衛教圖卡。</p>
-      </div>
-      <span class="go">開啟資料夾
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </span>
+      <div class="code">ED-05</div>
+      <h3>衛教－一般藥品</h3>
     </button>
     <div class="edu-collection" id="panel-ED05" style="display:none;">
+      <div class="edu-collection-intro">
+        <h2>衛教－一般藥品</h2>
+        <p>常見口服藥品的服用方式、副作用與注意事項衛教圖卡。</p>
+      </div>
 
       <article class="edu-card">
         <div class="edu-media">
@@ -534,20 +529,18 @@
     </div>
 
     <!-- ED-06 用藥須知 -->
-    <button type="button" class="doc-card edu-toggle-btn" data-target="panel-ED06">
+    <button type="button" class="edu-tile edu-toggle-btn" data-target="panel-ED06">
       <div class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       </div>
-      <div class="body">
-        <div class="code">ED-06</div>
-        <h3>衛教－用藥須知</h3>
-        <p>整體用藥安全觀念、常見用藥迷思與注意事項衛教圖卡。</p>
-      </div>
-      <span class="go">開啟資料夾
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </span>
+      <div class="code">ED-06</div>
+      <h3>衛教－用藥須知</h3>
     </button>
     <div class="edu-collection" id="panel-ED06" style="display:none;">
+      <div class="edu-collection-intro">
+        <h2>衛教－用藥須知</h2>
+        <p>整體用藥安全觀念、常見用藥迷思與注意事項衛教圖卡。</p>
+      </div>
 
       <article class="edu-card">
         <div class="edu-media">
@@ -613,20 +606,18 @@
     </div>
 
     <!-- ED-07 影片 -->
-    <button type="button" class="doc-card edu-toggle-btn" data-target="panel-ED07">
+    <button type="button" class="edu-tile edu-toggle-btn" data-target="panel-ED07">
       <div class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
       </div>
-      <div class="body">
-        <div class="code">ED-07</div>
-        <h3>衛教－影片</h3>
-        <p>各類用藥衛教教學影片，可直接於資料夾中線上播放。</p>
-      </div>
-      <span class="go">開啟資料夾
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </span>
+      <div class="code">ED-07</div>
+      <h3>衛教－影片</h3>
     </button>
     <div class="edu-collection" id="panel-ED07" style="display:none;">
+      <div class="edu-collection-intro">
+        <h2>衛教－影片</h2>
+        <p>各類用藥衛教教學影片，可直接於資料夾中線上播放。</p>
+      </div>
       <a class="zone-feature" href="https://drive.google.com/drive/folders/1ORoGeyf9iTJsc6vzUpiNL7HwVGAowlsR?usp=drive_link" target="_blank" rel="noopener">
         <div class="icon icon-edu">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="15" height="14" rx="2"/><path d="M23 7l-7 5 7 5V7z"/></svg>
@@ -660,21 +651,27 @@ document.getElementById('edu-btn-drug-lookup').addEventListener('click', functio
   });
 });
 
-/* 所有衛教分類卡片：點擊展開／收合對應的內容區塊 */
+/* 衛教主題方塊：點擊後隱藏方塊列表，顯示該分類完整內容；返回按鈕則回到方塊列表 */
+var eduTileGrid = document.getElementById('edu-tile-grid');
+var eduBackBtn = document.getElementById('edu-back-btn');
+var eduAllPanels = document.querySelectorAll('.edu-collection');
+
 document.querySelectorAll('.edu-toggle-btn').forEach(function(btn){
   btn.addEventListener('click', function(){
     var panel = document.getElementById(btn.getAttribute('data-target'));
-    var label = btn.querySelector('.go');
-    var isOpen = panel.style.display !== 'none';
-    if(isOpen){
-      panel.style.display = 'none';
-      label.innerHTML = '開啟資料夾 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
-    }else{
-      panel.style.display = 'flex';
-      label.innerHTML = '收合資料夾 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>';
-      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
+    eduTileGrid.style.display = 'none';
+    eduAllPanels.forEach(function(p){ p.style.display = 'none'; });
+    panel.style.display = 'flex';
+    eduBackBtn.style.display = 'inline-flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+});
+
+eduBackBtn.addEventListener('click', function(){
+  eduAllPanels.forEach(function(p){ p.style.display = 'none'; });
+  eduTileGrid.style.display = 'grid';
+  eduBackBtn.style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 </script>
 
