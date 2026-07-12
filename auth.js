@@ -91,15 +91,13 @@ function fetchStaffList(){
     });
 }
 
-/* 頁面上顯示「XXX 您好」的小標籤，找得到 #staff-greeting-slot 才會顯示；同時附上登出按鈕 */
+/* 頁面上顯示登出按鈕，找得到 #staff-greeting-slot 才會顯示；登入後不顯示姓名，只留登出按鈕 */
 function renderStaffGreeting(){
   var slot = document.getElementById('staff-greeting-slot');
   if(!slot) return;
   var name = getStaffName();
   if(name && isStaffAuthed()){
     slot.innerHTML = '';
-    var nameText = document.createTextNode(name + ' 您好');
-    slot.appendChild(nameText);
     var logoutBtn = document.createElement('button');
     logoutBtn.type = 'button';
     logoutBtn.className = 'staff-logout-btn';
@@ -116,12 +114,12 @@ function renderStaffGreeting(){
   }
 }
 
-/* 登出：清除本機儲存的員工驗證狀態，回到首頁並重新整理 */
+/* 登出：清除本機儲存的員工驗證狀態，但保留「訪客」身分，直接回到可瀏覽畫面，不再詢問身分 */
 function logoutStaff(){
   try{
     localStorage.removeItem(STAFF_AUTH_STORAGE_KEY);
     localStorage.removeItem(STAFF_NAME_STORAGE_KEY);
-    localStorage.removeItem(ROLE_PICKED_STORAGE_KEY);
+    setPickedRole('guest');
   }catch(e){}
   window.location.href = 'index.html';
 }
