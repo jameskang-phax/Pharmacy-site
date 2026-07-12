@@ -1167,3 +1167,10 @@ button.doc-card{
 @media (max-width:640px){
   .doc-card{ flex-direction:column; align-items:flex-start; text-align:left; }
 }
+
+/* 防止 iOS Safari 自動偵測（電話/地址/日期等）把文字加上藍色底線連結樣式 */
+a[x-apple-data-detectors],
+.x-apple-data-detectors{
+  color:inherit !important;
+  text-decoration:inherit !important;
+}
