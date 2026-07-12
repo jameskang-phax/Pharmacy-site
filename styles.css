@@ -53,14 +53,28 @@ body{
 .staff-greeting{
   display:inline-flex;
   align-items:center;
+  gap:8px;
   font-size:12px;
   font-weight:700;
   color:var(--teal-dark);
   background:var(--amber-soft);
-  padding:4px 12px;
+  padding:4px 8px 4px 12px;
   border-radius:999px;
   white-space:nowrap;
 }
+.staff-logout-btn{
+  font-family:inherit;
+  font-size:11px;
+  font-weight:700;
+  color:var(--teal-dark);
+  background:rgba(255,255,255,.6);
+  border:none;
+  border-radius:999px;
+  padding:3px 10px;
+  cursor:pointer;
+  transition:background .15s ease;
+}
+.staff-logout-btn:hover{ background:#fff; }
 @media (max-width:640px){
   .topbar .wrap{ height:auto; padding-top:12px; padding-bottom:12px; flex-wrap:wrap; }
   .brand{ font-size:14px; }
