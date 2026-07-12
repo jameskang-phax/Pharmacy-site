@@ -52,13 +52,13 @@
         <span class="tile-hint">點擊展開</span>
       </button>
 
-      <button class="tile tile-edu" type="button" data-target="panel-edu" aria-expanded="false">
+      <a class="tile tile-edu" href="education.html">
         <span class="tile-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         </span>
         <span class="tile-title">衛教專區</span>
-        <span class="tile-hint">點擊展開</span>
-      </button>
+        <span class="tile-hint">前往查看</span>
+      </a>
     </div>
 
     <!-- 表單展開內容 -->
@@ -126,23 +126,6 @@
       </div>
     </div>
 
-    <!-- 衛教專區展開內容 -->
-    <div class="tile-panel" id="panel-edu">
-      <a class="zone-feature" href="education.html">
-        <div class="icon icon-edu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        </div>
-        <div class="body">
-          <div class="code">ED-01</div>
-          <h3>用藥衛教圖卡與影片</h3>
-          <p>提供病人／家屬的衛教圖卡與教學影片，涵蓋吸入劑、注射、保存方式等主題。</p>
-        </div>
-        <span class="go">前往閱讀
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </span>
-      </a>
-    </div>
-
     <!-- ============ 藥劑科公告事項（全院共享，時間序） ============ -->
     <section class="announce">
       <div class="section-head">
@@ -179,7 +162,7 @@
 showEntryGate();
 </script>
 <script>
-document.querySelectorAll('.tile').forEach(function(tile){
+document.querySelectorAll('.tile[data-target]').forEach(function(tile){
   tile.addEventListener('click', function(){
     function openThisPanel(){
       var targetId = tile.getAttribute('data-target');

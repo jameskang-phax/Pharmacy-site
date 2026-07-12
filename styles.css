@@ -778,6 +778,7 @@ footer{
   justify-content:center;
   gap:8px;
   color:#fff;
+  text-decoration:none;
   transition:transform .15s ease, box-shadow .15s ease;
   box-shadow:0 6px 18px rgba(0,0,0,0.10);
 }
