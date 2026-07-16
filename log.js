@@ -7,6 +7,24 @@
    欄位名稱會直接讀試算表的表頭列，不需要另外設定欄位對應。
    ============================================================ */
 
+/* Google 表單的時間戳記格式為「2026/7/11 下午 4:17:41」，
+   JavaScript 內建的 Date 解析看不懂中文的上午/下午，會直接判定成無效日期，導致排序失效。
+   這個函式專門處理這種格式，回傳可以用來比較大小的毫秒數；若格式不符，退回原生解析當備援。 */
+function parseZhTimestamp(str){
+  if(!str) return 0;
+  var s = String(str).trim();
+  var m = s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})\s+(上午|下午)\s*(\d{1,2}):(\d{2}):(\d{2})$/);
+  if(m){
+    var year = +m[1], month = +m[2], day = +m[3], ampm = m[4];
+    var hour = +m[5], min = +m[6], sec = +m[7];
+    if(ampm === '下午' && hour < 12) hour += 12;
+    if(ampm === '上午' && hour === 12) hour = 0;
+    return new Date(year, month - 1, day, hour, min, sec).getTime();
+  }
+  var fallback = new Date(s).getTime();
+  return isNaN(fallback) ? 0 : fallback;
+}
+
 function parseLogCSV(text){
   var rows = [];
   var row = [];
@@ -131,7 +149,7 @@ function loadLogData(){
         };
       }).filter(function(item){ return item.ts !== ''; });
 
-      LOG_ITEMS.sort(function(a, b){ return new Date(b.ts) - new Date(a.ts); });
+      LOG_ITEMS.sort(function(a, b){ return parseZhTimestamp(b.ts) - parseZhTimestamp(a.ts); });
 
       var input = document.getElementById("q");
       renderLogList(searchLog(input.value));
