@@ -291,13 +291,26 @@ function renderAnnouncements(rows){
   var toggleWrap = document.getElementById('announce-toggle-wrap');
   errorEl.style.display = 'none';
 
-  // 第一列是表頭：時間戳記／公告標題／公告內容／是否置頂／附件檔案
+  // 用欄位標題文字動態找出每一欄的位置，不依賴固定順序，
+  // 這樣以後表單題目順序被調整，網站也不會抓錯資料。
+  var headerRow = rows[0] || [];
+  function findCol(keyword, fallbackIndex){
+    for(var i = 0; i < headerRow.length; i++){
+      if((headerRow[i] || '').indexOf(keyword) > -1) return i;
+    }
+    return fallbackIndex;
+  }
+  var colTitle = findCol('標題', 1);
+  var colBody = findCol('內容', 2);
+  var colPinned = findCol('置頂', 3);
+  var colAttachment = findCol('附件', 4);
+
   var dataRows = rows.slice(1);
   var items = dataRows.map(function(r){
-    var pinRaw = (r[3] || '').trim();
+    var pinRaw = (r[colPinned] || '').trim();
     var isPinned = pinRaw === '是' || pinRaw.toLowerCase() === 'yes' || pinRaw.toLowerCase() === 'true';
-    var attachmentRaw = (r[4] || '').trim();
-    return { ts: r[0] || '', title: r[1] || '', body: r[2] || '', pinned: isPinned, attachment: attachmentRaw };
+    var attachmentRaw = (r[colAttachment] || '').trim();
+    return { ts: r[0] || '', title: r[colTitle] || '', body: r[colBody] || '', pinned: isPinned, attachment: attachmentRaw };
   }).filter(function(item){ return item.title.trim() !== ''; });
 
   items.sort(function(a,b){
