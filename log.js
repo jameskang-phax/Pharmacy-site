@@ -25,6 +25,35 @@ function parseZhTimestamp(str){
   return isNaN(fallback) ? 0 : fallback;
 }
 
+/* 解析「效期」欄位，支援常見格式：2026.08、2026/08、2026-08、2026年8月
+   回傳該月最後一天的毫秒數，方便跟現在時間比較；格式不符則回傳 null（不處理，維持原樣顯示） */
+function parseExpiryDate(str){
+  var s = String(str).trim();
+  var m = s.match(/^(\d{4})[.\/\-年](\d{1,2})月?$/);
+  if(!m) return null;
+  var year = +m[1], month = +m[2];
+  if(month < 1 || month > 12) return null;
+  return new Date(year, month, 0).getTime();
+}
+
+/* 依效期毫秒數，判斷是否已過期或即將到期（6個月內），回傳 null 代表效期還久、不用特別提示 */
+function expiryStatus(ms){
+  if(ms === null || ms === undefined) return null;
+  var now = Date.now();
+  var sixMonthsLater = now + 1000 * 60 * 60 * 24 * 182;
+  if(ms < now) return { label: '已過期', cls: 'log-expiry-expired' };
+  if(ms < sixMonthsLater) return { label: '6個月內到期', cls: 'log-expiry-soon' };
+  return null;
+}
+
+/* 判斷一筆紀錄裡，是否含有「效期」欄位且已過期或即將到期 */
+function itemHasExpiryAlert(item){
+  return item.fields.some(function(f){
+    if(f.label.indexOf('效期') === -1) return false;
+    return expiryStatus(parseExpiryDate(f.value)) !== null;
+  });
+}
+
 function parseLogCSV(text){
   var rows = [];
   var row = [];
@@ -93,7 +122,12 @@ function renderLogList(items){
     var fieldsHtml = item.fields
       .filter(function(f){ return f.value && f.value.trim() !== ''; })
       .map(function(f){
-        return '<dt>' + escapeLogHtml(f.label) + '</dt><dd>' + formatLogValue(f.value) + '</dd>';
+        var extra = '';
+        if(f.label.indexOf('效期') > -1){
+          var status = expiryStatus(parseExpiryDate(f.value));
+          if(status) extra = ' <span class="log-expiry-badge ' + status.cls + '">' + status.label + '</span>';
+        }
+        return '<dt>' + escapeLogHtml(f.label) + '</dt><dd>' + formatLogValue(f.value) + extra + '</dd>';
       }).join('');
     return '<div class="log-item">' +
       '<div class="log-date">' + escapeLogHtml(item.ts) + '</div>' +
@@ -102,12 +136,41 @@ function renderLogList(items){
   }).join("");
 }
 
+var expiryOnlyMode = false;
+
 function searchLog(keyword){
   var k = keyword.trim().toLowerCase();
-  if(!k) return LOG_ITEMS;
-  return LOG_ITEMS.filter(function(item){
-    return item.ts.toLowerCase().includes(k) ||
-      item.fields.some(function(f){ return String(f.value).toLowerCase().includes(k); });
+  var base = LOG_ITEMS;
+  if(k){
+    base = base.filter(function(item){
+      return item.ts.toLowerCase().includes(k) ||
+        item.fields.some(function(f){ return String(f.value).toLowerCase().includes(k); });
+    });
+  }
+  if(expiryOnlyMode){
+    base = base.filter(itemHasExpiryAlert);
+  }
+  return base;
+}
+
+/* 若這份資料含有「效期」欄位，動態插入一個篩選開關；沒有的話（例如其他表單）就不會出現，不用另外改 HTML */
+function ensureExpiryFilterUI(){
+  if(document.getElementById('expiry-filter-wrap')) return;
+  var hasExpiryField = LOG_HEADERS.some(function(h){ return h.indexOf('效期') > -1; });
+  if(!hasExpiryField) return;
+
+  var wrap = document.createElement('label');
+  wrap.id = 'expiry-filter-wrap';
+  wrap.className = 'expiry-filter-wrap';
+  wrap.innerHTML = '<input type="checkbox" id="expiry-filter-checkbox"> 只顯示含即期／過期品項的紀錄';
+
+  var searchBox = document.querySelector('.search-box');
+  searchBox.parentNode.insertBefore(wrap, searchBox.nextSibling);
+
+  document.getElementById('expiry-filter-checkbox').addEventListener('change', function(e){
+    expiryOnlyMode = e.target.checked;
+    var input = document.getElementById('q');
+    renderLogList(searchLog(input.value));
   });
 }
 
@@ -150,6 +213,8 @@ function loadLogData(){
       }).filter(function(item){ return item.ts !== ''; });
 
       LOG_ITEMS.sort(function(a, b){ return parseZhTimestamp(b.ts) - parseZhTimestamp(a.ts); });
+
+      ensureExpiryFilterUI();
 
       var input = document.getElementById("q");
       renderLogList(searchLog(input.value));

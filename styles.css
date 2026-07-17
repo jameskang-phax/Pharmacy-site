@@ -1061,6 +1061,41 @@ footer{
   font-size:11px;
   color:var(--ink-soft);
   margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.log-expiry-badge{
+  display:inline-block;
+  font-size:11px;
+  font-weight:700;
+  padding:2px 10px;
+  border-radius:999px;
+  white-space:nowrap;
+  margin-left:6px;
+}
+.log-expiry-expired{
+  color:#791F1F;
+  background:#F7C1C1;
+}
+.log-expiry-soon{
+  color:#633806;
+  background:#FAC775;
+}
+.expiry-filter-wrap{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:14px;
+  color:var(--ink);
+  margin:-10px 0 20px;
+  cursor:pointer;
+}
+.expiry-filter-wrap input{
+  width:16px;
+  height:16px;
+  cursor:pointer;
 }
 .log-fields{
   display:grid;
