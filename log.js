@@ -118,8 +118,16 @@ function renderLogList(items){
   }
   empty.style.display = "none";
 
+  var focusLabels = ['藥名', '批號', '效期', '數量'];
+
   list.innerHTML = items.map(function(item){
-    var fieldsHtml = item.fields
+    var fields = item.fields;
+    if(expiryOnlyMode){
+      fields = fields.filter(function(f){
+        return focusLabels.some(function(fl){ return f.label.indexOf(fl) > -1; });
+      });
+    }
+    var fieldsHtml = fields
       .filter(function(f){ return f.value && f.value.trim() !== ''; })
       .map(function(f){
         var extra = '';
