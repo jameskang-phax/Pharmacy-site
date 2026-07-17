@@ -303,7 +303,17 @@ function renderAnnouncements(rows){
   var colTitle = findCol('標題', 1);
   var colBody = findCol('內容', 2);
   var colPinned = findCol('置頂', 3);
-  var colAttachment = findCol('附件', 4);
+  var colAttachment = (function(){
+    for(var i = 0; i < headerRow.length; i++){
+      var h = headerRow[i] || '';
+      // 「上傳檔案或圖片」這種欄位才是真正存放連結的欄位；
+      // 「需要上傳檔案或圖片嗎？」只是是非題，要排除掉（用「嗎」字判斷）。
+      if((h.indexOf('附件') > -1 || h.indexOf('檔案') > -1 || h.indexOf('圖片') > -1) && h.indexOf('嗎') === -1){
+        return i;
+      }
+    }
+    return 4;
+  })();
 
   var dataRows = rows.slice(1);
   var items = dataRows.map(function(r){
