@@ -143,11 +143,13 @@
         <span class="num">03</span>
         <h2>藥劑科公告事項</h2>
         <span class="rule"></span>
-        <div class="mascot-float" aria-hidden="true">
+        <div class="mascot-float" id="mascot-float">
           <span class="mascot-speech">嗨，我是藥神丸子</span>
-          <img src="images/yao-shen-wan.jpg" alt="藥神丸吉祥物" loading="lazy">
+          <img id="mascot-img" src="images/yao-shen-wan.jpg" alt="藥神丸吉祥物，點一下跟我打招呼" loading="lazy" role="button" tabindex="0">
         </div>
       </div>
+
+      <p class="announce-tagline">掌握藥劑科即時消息，置頂公告不錯過。<span class="announce-stats" id="announce-stats"></span></p>
 
       <div class="announce-actions">
         <a class="announce-add-btn" href="https://forms.gle/kUX38uAgRRcqjGCy5" target="_blank" rel="noopener">
@@ -198,6 +200,35 @@ document.querySelectorAll('.tile[data-target]').forEach(function(tile){
     }
   });
 });
+
+/* 藥神丸子：點一下（或用鍵盤 Enter/空白鍵）搖擺一下打招呼 */
+(function(){
+  var mascotWrap = document.getElementById('mascot-float');
+  var mascotImg = document.getElementById('mascot-img');
+  if(!mascotWrap || !mascotImg) return;
+  var mascotSpeechEl = mascotWrap.querySelector('.mascot-speech');
+  var mascotMessages = ['嗨，我是藥神丸子','記得洗手，才安心 🧼','公告別忘了看一下喔','辛苦了，喝口水吧','按時吃藥，健康久久','有問題找我，別客氣'];
+  var mascotMsgIndex = 0;
+  function playWiggle(){
+    mascotWrap.classList.remove('is-clicked');
+    void mascotWrap.offsetWidth; /* 強制重新觸發動畫 */
+    mascotWrap.classList.add('is-clicked');
+    if(mascotSpeechEl){
+      mascotMsgIndex = (mascotMsgIndex + 1) % mascotMessages.length;
+      mascotSpeechEl.textContent = mascotMessages[mascotMsgIndex];
+    }
+  }
+  mascotWrap.addEventListener('animationend', function(e){
+    if(e.target === mascotImg) mascotWrap.classList.remove('is-clicked');
+  });
+  mascotImg.addEventListener('click', playWiggle);
+  mascotImg.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      playWiggle();
+    }
+  });
+})();
 
 /* 頂部三個快捷按鈕（藥品查詢／儲位查詢／現場作業Q&A）都需要通行碼 */
 ['btn-drug-lookup','btn-storage','btn-abnormal'].forEach(function(id){
@@ -336,9 +367,17 @@ function renderAnnouncements(rows){
     listEl.innerHTML = '';
     emptyEl.style.display = 'block';
     toggleWrap.innerHTML = '';
+    var statsEmptyEl = document.getElementById('announce-stats');
+    if(statsEmptyEl) statsEmptyEl.textContent = '';
     return;
   }
   emptyEl.style.display = 'none';
+
+  var statsEl = document.getElementById('announce-stats');
+  if(statsEl){
+    var pinnedCount = items.filter(function(i){ return i.pinned; }).length;
+    statsEl.textContent = '共 ' + items.length + ' 則' + (pinnedCount > 0 ? '・置頂 ' + pinnedCount + ' 則' : '');
+  }
 
   var LIMIT = 10;
   var visibleItems = items.slice(0, LIMIT);

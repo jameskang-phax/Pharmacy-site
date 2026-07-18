@@ -937,6 +937,23 @@ footer{
   line-height:1.6;
 }
 
+.announce-tagline{
+  font-size:14px;
+  color:var(--ink-soft);
+  margin:0 0 18px;
+  line-height:1.6;
+}
+.announce-stats{
+  display:inline-block;
+  margin-left:8px;
+  padding:2px 10px;
+  border-radius:999px;
+  background:var(--amber-soft);
+  color:var(--amber);
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+}
+
 .announce-list{
   display:flex;
   flex-direction:column;
@@ -1218,11 +1235,25 @@ a[x-apple-data-detectors],
   text-decoration:inherit !important;
 }
 
-/* ---------- 藥神丸吉祥物：放在「藥劑科公告事項」標題旁邊，上下飄浮動畫 ---------- */
+/* ---------- 藥神丸吉祥物：放在「藥劑科公告事項」標題右上角，脫離標題列的高度計算 ----------
+   用 position:absolute 讓吉祥物不再撐高 .section-head 那一行，
+   避免標題左側因為吉祥物太高而多出一大塊空白；
+   下方按鈕／說明文字改用 padding-right 讓開，避免文字被圖片壓到。 */
+.announce .section-head{
+  position:relative;
+  padding-right:98px;
+  margin-bottom:14px;
+}
+.announce .announce-actions,
+.announce .announce-note,
+.announce .announce-tagline{
+  padding-right:98px;
+}
 .mascot-float{
-  width:84px;
-  flex:none;
-  align-self:center;
+  position:absolute;
+  top:-6px;
+  right:0;
+  width:76px;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -1235,7 +1266,19 @@ a[x-apple-data-detectors],
   height:auto;
   border-radius:14px;
   border:none;
+  cursor:pointer;
   filter:drop-shadow(0 6px 12px rgba(28,43,39,0.18));
+  transition:filter .15s ease;
+}
+.mascot-float img:hover{
+  filter:drop-shadow(0 8px 16px rgba(28,43,39,0.24));
+}
+.mascot-float img:focus-visible{
+  outline:2px solid var(--teal);
+  outline-offset:3px;
+}
+.mascot-float.is-clicked img{
+  animation:mascotWiggle .7s ease;
 }
 .mascot-speech{
   position:relative;
@@ -1271,13 +1314,26 @@ a[x-apple-data-detectors],
   border-bottom:7px solid var(--line);
 }
 @media (min-width:640px){
-  .mascot-float{ width:108px; }
+  .mascot-float{ width:96px; top:-10px; }
   .mascot-speech{ font-size:12px; }
+  .announce .section-head{ padding-right:118px; }
+  .announce .announce-actions,
+  .announce .announce-note,
+  .announce .announce-tagline{ padding-right:118px; }
 }
 @keyframes mascotFloat{
   0%,100%{ transform:translateY(0); }
   50%{ transform:translateY(-10px); }
 }
+@keyframes mascotWiggle{
+  0%{ transform:rotate(0deg) scale(1); }
+  20%{ transform:rotate(-10deg) scale(1.06); }
+  40%{ transform:rotate(9deg) scale(1.06); }
+  60%{ transform:rotate(-6deg) scale(1.03); }
+  80%{ transform:rotate(4deg) scale(1.03); }
+  100%{ transform:rotate(0deg) scale(1); }
+}
 @media (prefers-reduced-motion: reduce){
   .mascot-float{ animation:none; }
+  .mascot-float.is-clicked img{ animation:none; }
 }
