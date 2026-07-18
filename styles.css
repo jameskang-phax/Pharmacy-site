@@ -1217,3 +1217,32 @@ a[x-apple-data-detectors],
   color:inherit !important;
   text-decoration:inherit !important;
 }
+
+/* ---------- 藥神丸吉祥物：固定在右下角，上下飄浮動畫 ---------- */
+.mascot-float{
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  z-index:60;
+  width:92px;
+  animation:mascotFloat 3.2s ease-in-out infinite;
+  filter:drop-shadow(0 8px 16px rgba(28,43,39,0.18));
+  pointer-events:none;
+}
+.mascot-float img{
+  display:block;
+  width:100%;
+  height:auto;
+  border-radius:16px;
+  border:3px solid #FFFFFF;
+}
+@media (min-width:640px){
+  .mascot-float{ width:120px; right:24px; bottom:24px; }
+}
+@keyframes mascotFloat{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-14px); }
+}
+@media (prefers-reduced-motion: reduce){
+  .mascot-float{ animation:none; }
+}
