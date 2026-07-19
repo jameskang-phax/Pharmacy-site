@@ -368,6 +368,7 @@ function renderStats(){
   html += '</div>';
 
   if(fields.cleaningLabel && fields.ownerLabel){
+    var seenNames = {};
     var doneList = items.filter(function(item){
       var v = findFieldValue(item, fields.cleaningLabel);
       return v.indexOf('已完成') > -1;
@@ -376,7 +377,13 @@ function renderStats(){
         owner: findFieldValue(item, fields.ownerLabel),
         area: fields.areaLabel ? findFieldValue(item, fields.areaLabel) : ''
       };
-    }).filter(function(x){ return x.owner; });
+    }).filter(function(x){
+      if(!x.owner) return false;
+      var key = x.owner + '|' + x.area;
+      if(seenNames[key]) return false;
+      seenNames[key] = true;
+      return true;
+    });
 
     html += '<div class="log-stats-namelist"><h4>🧹 已完成清潔名單</h4>';
     if(doneList.length === 0){
