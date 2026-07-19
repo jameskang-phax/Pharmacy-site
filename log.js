@@ -99,6 +99,24 @@ function itemIsResolved(item){
   });
 }
 
+/* 依「欄位名稱包含某關鍵字」取值，抓第一個符合的欄位（找不到回傳空字串） */
+function findFieldValue(item, labelSubstr){
+  if(!labelSubstr) return '';
+  var f = item.fields.filter(function(x){ return x.label.indexOf(labelSubstr) > -1; })[0];
+  return f ? f.value.trim() : '';
+}
+
+/* 算出這筆紀錄屬於哪個月份（YYYY/MM），優先用指定的日期欄位（例如「發生日期」），
+   沒有該欄位或解析失敗就退回用填寫時間戳記 */
+function getItemMonthKey(item, dateLabel){
+  var raw = dateLabel ? findFieldValue(item, dateLabel) : '';
+  if(!raw) raw = item.ts;
+  var m = String(raw).match(/(\d{4})[\/\-.](\d{1,2})/);
+  if(!m) return null;
+  var mm = m[2].length < 2 ? ('0' + m[2]) : m[2];
+  return m[1] + '/' + mm;
+}
+
 var LOG_HEADERS = [];
 var LOG_ITEMS = [];
 
@@ -219,6 +237,113 @@ function ensureExpiryFilterUI(){
   }
 }
 
+/* ---------- 每月統計（件數／通報人次／處方來源／錯誤類型） ----------
+   只有在這份表單「同時具備」通報人、處方來源、錯誤類型其中至少一個欄位時才會出現，
+   所以不會影響其他表單（例如公告、效期查詢）的頁面。 */
+function ensureStatsUI(){
+  if(document.getElementById('log-stats-panel')) return;
+  var reporterLabel = LOG_HEADERS.filter(function(h){ return h.indexOf('通報人') > -1; })[0];
+  var sourceLabel = LOG_HEADERS.filter(function(h){ return h.indexOf('處方來源') > -1; })[0];
+  var typeLabel = LOG_HEADERS.filter(function(h){ return h.indexOf('錯誤類型') > -1; })[0];
+  var dateLabel = LOG_HEADERS.filter(function(h){ return h.indexOf('發生日期') > -1; })[0];
+  if(!reporterLabel && !sourceLabel && !typeLabel) return;
+
+  window.LOG_STATS_FIELDS = {
+    reporterLabel: reporterLabel, sourceLabel: sourceLabel,
+    typeLabel: typeLabel, dateLabel: dateLabel
+  };
+
+  var panel = document.createElement('div');
+  panel.id = 'log-stats-panel';
+  panel.className = 'log-stats-panel';
+  panel.innerHTML =
+    '<div class="log-stats-head">' +
+      '<h3>📊 每月統計</h3>' +
+      '<select id="stats-month-select"></select>' +
+    '</div>' +
+    '<div id="stats-body" class="log-stats-body"></div>';
+
+  var anchor = document.getElementById('show-resolved-wrap') ||
+               document.getElementById('expiry-filter-wrap') ||
+               document.querySelector('.search-box');
+  anchor.parentNode.insertBefore(panel, anchor.nextSibling);
+
+  document.getElementById('stats-month-select').addEventListener('change', renderStats);
+}
+
+/* 依目前資料重新列出「有紀錄的月份」選項，盡量保留使用者原本選的月份；
+   資料是新載入（例如按了重新整理）時，預設選最新的月份 */
+function populateStatsMonths(){
+  var select = document.getElementById('stats-month-select');
+  if(!select) return;
+  var fields = window.LOG_STATS_FIELDS;
+  var monthSet = {};
+  LOG_ITEMS.forEach(function(item){
+    var key = getItemMonthKey(item, fields.dateLabel);
+    if(key) monthSet[key] = true;
+  });
+  var monthList = Object.keys(monthSet).sort().reverse();
+  var prevValue = select.value;
+
+  select.innerHTML = '<option value="all">全部月份</option>' +
+    monthList.map(function(m){ return '<option value="' + m + '">' + m + '</option>'; }).join('');
+
+  if(prevValue && (prevValue === 'all' || monthList.indexOf(prevValue) > -1)){
+    select.value = prevValue;
+  }else if(monthList.length){
+    select.value = monthList[0];
+  }else{
+    select.value = 'all';
+  }
+  renderStats();
+}
+
+function renderStats(){
+  var fields = window.LOG_STATS_FIELDS;
+  var body = document.getElementById('stats-body');
+  var select = document.getElementById('stats-month-select');
+  if(!fields || !body || !select) return;
+
+  var month = select.value;
+  var items = LOG_ITEMS.filter(function(item){
+    if(month === 'all') return true;
+    return getItemMonthKey(item, fields.dateLabel) === month;
+  });
+
+  function tally(label){
+    if(!label) return null;
+    var counts = {};
+    items.forEach(function(item){
+      var v = findFieldValue(item, label);
+      if(!v) return;
+      counts[v] = (counts[v] || 0) + 1;
+    });
+    var arr = Object.keys(counts).map(function(k){ return { label: k, count: counts[k] }; });
+    arr.sort(function(a, b){ return b.count - a.count; });
+    return arr;
+  }
+
+  function renderBreakdown(title, arr){
+    if(!arr) return '';
+    var inner = arr.length === 0
+      ? '<p class="log-stats-empty">尚無資料</p>'
+      : arr.map(function(x){
+          return '<div class="log-stats-row"><span class="log-stats-label">' + escapeLogHtml(x.label) +
+                 '</span><span class="log-stats-count">' + x.count + '</span></div>';
+        }).join('');
+    return '<div class="log-stats-block"><h4>' + escapeLogHtml(title) + '</h4>' + inner + '</div>';
+  }
+
+  var html = '<div class="log-stats-total">總件數 <strong>' + items.length + '</strong> 件</div>';
+  html += '<div class="log-stats-grid">';
+  html += renderBreakdown('通報人次', tally(fields.reporterLabel));
+  html += renderBreakdown('處方來源', tally(fields.sourceLabel));
+  html += renderBreakdown('錯誤類型', tally(fields.typeLabel));
+  html += '</div>';
+
+  body.innerHTML = html;
+}
+
 function loadLogData(){
   var list = document.getElementById("list");
   var count = document.getElementById("count");
@@ -260,6 +385,8 @@ function loadLogData(){
       LOG_ITEMS.sort(function(a, b){ return parseZhTimestamp(b.ts) - parseZhTimestamp(a.ts); });
 
       ensureExpiryFilterUI();
+      ensureStatsUI();
+      populateStatsMonths();
 
       var input = document.getElementById("q");
       renderLogList(searchLog(input.value));
