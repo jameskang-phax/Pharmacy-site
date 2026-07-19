@@ -237,21 +237,37 @@ function ensureExpiryFilterUI(){
   }
 }
 
-/* ---------- 每月統計（件數／通報人次／處方來源／錯誤類型） ----------
-   只有在這份表單「同時具備」通報人、處方來源、錯誤類型其中至少一個欄位時才會出現，
-   所以不會影響其他表單（例如公告、效期查詢）的頁面。 */
+/* ---------- 每月統計（件數＋各種分類欄位統計） ----------
+   用「同義詞群組」比對表頭欄位，抓到哪個就統計哪個，不同表單（調劑錯誤／藥物諮詢…）
+   欄位名稱不完全一樣也能自動對應，之後要支援新表單，加一組同義詞就好，不用改邏輯。 */
+var STATS_GROUPS = [
+  { title: '通報人次', matches: ['通報人', '紀錄者', '填寫人', '通報者'] },
+  { title: '處方來源', matches: ['處方來源'] },
+  { title: '對象',     matches: ['對象'] },
+  { title: '問題類型', matches: ['問題類型'] },
+  { title: '錯誤類型', matches: ['錯誤類型'] }
+];
+var STATS_DATE_MATCHES = ['發生日期', '諮詢日期', '填寫日期', '日期'];
+
+function findHeaderByMatches(matches){
+  for(var i = 0; i < matches.length; i++){
+    var found = LOG_HEADERS.filter(function(h){ return h.indexOf(matches[i]) > -1; })[0];
+    if(found) return found;
+  }
+  return null;
+}
+
 function ensureStatsUI(){
   if(document.getElementById('log-stats-panel')) return;
-  var reporterLabel = LOG_HEADERS.filter(function(h){ return h.indexOf('通報人') > -1; })[0];
-  var sourceLabel = LOG_HEADERS.filter(function(h){ return h.indexOf('處方來源') > -1; })[0];
-  var typeLabel = LOG_HEADERS.filter(function(h){ return h.indexOf('錯誤類型') > -1; })[0];
-  var dateLabel = LOG_HEADERS.filter(function(h){ return h.indexOf('發生日期') > -1; })[0];
-  if(!reporterLabel && !sourceLabel && !typeLabel) return;
 
-  window.LOG_STATS_FIELDS = {
-    reporterLabel: reporterLabel, sourceLabel: sourceLabel,
-    typeLabel: typeLabel, dateLabel: dateLabel
-  };
+  var groups = STATS_GROUPS.map(function(g){
+    return { title: g.title, label: findHeaderByMatches(g.matches) };
+  }).filter(function(g){ return g.label; });
+  var dateLabel = findHeaderByMatches(STATS_DATE_MATCHES);
+
+  if(groups.length === 0) return;
+
+  window.LOG_STATS_FIELDS = { groups: groups, dateLabel: dateLabel };
 
   var panel = document.createElement('div');
   panel.id = 'log-stats-panel';
@@ -336,9 +352,9 @@ function renderStats(){
 
   var html = '<div class="log-stats-total">總件數 <strong>' + items.length + '</strong> 件</div>';
   html += '<div class="log-stats-grid">';
-  html += renderBreakdown('通報人次', tally(fields.reporterLabel));
-  html += renderBreakdown('處方來源', tally(fields.sourceLabel));
-  html += renderBreakdown('錯誤類型', tally(fields.typeLabel));
+  fields.groups.forEach(function(g){
+    html += renderBreakdown(g.title, tally(g.label));
+  });
   html += '</div>';
 
   body.innerHTML = html;
