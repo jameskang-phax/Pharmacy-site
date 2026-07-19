@@ -1223,6 +1223,32 @@ footer{
   color:var(--ink-soft);
   margin:0;
 }
+.log-stats-namelist{
+  margin-top:16px;
+  padding-top:16px;
+  border-top:1px solid var(--line);
+}
+.log-stats-namelist h4{
+  font-size:13px;
+  color:var(--ink-soft);
+  margin:0 0 10px;
+  font-weight:700;
+}
+.log-stats-name-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.log-stats-name-tag{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 12px;
+  border-radius:999px;
+  background:var(--teal);
+  color:#fff;
+  font-size:13px;
+  font-weight:600;
+}
 @media (max-width:640px){
   .log-stats-grid{ grid-template-columns:1fr; }
 }

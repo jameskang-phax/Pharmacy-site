@@ -265,9 +265,19 @@ function ensureStatsUI(){
   }).filter(function(g){ return g.label; });
   var dateLabel = findHeaderByMatches(STATS_DATE_MATCHES);
 
-  if(groups.length === 0) return;
+  /* 5S 查核表這類「XX 已完成清潔／已完成保養」的欄位，統計時不適合用次數分布，
+     而是要列出「誰做完了」的名單，所以獨立處理，不放進 STATS_GROUPS 的計數邏輯裡 */
+  var cleaningLabel = findHeaderByMatches(['清潔', '保養']);
+  var ownerLabel = findHeaderByMatches(['負責人', '通報人', '紀錄者', '填寫人']);
+  var areaLabel = findHeaderByMatches(['負責區域', '區域']);
+  var hasNameList = !!(cleaningLabel && ownerLabel);
 
-  window.LOG_STATS_FIELDS = { groups: groups, dateLabel: dateLabel };
+  if(groups.length === 0 && !hasNameList) return;
+
+  window.LOG_STATS_FIELDS = {
+    groups: groups, dateLabel: dateLabel,
+    cleaningLabel: cleaningLabel, ownerLabel: ownerLabel, areaLabel: areaLabel
+  };
 
   var panel = document.createElement('div');
   panel.id = 'log-stats-panel';
@@ -356,6 +366,29 @@ function renderStats(){
     html += renderBreakdown(g.title, tally(g.label));
   });
   html += '</div>';
+
+  if(fields.cleaningLabel && fields.ownerLabel){
+    var doneList = items.filter(function(item){
+      var v = findFieldValue(item, fields.cleaningLabel);
+      return v.indexOf('已完成') > -1;
+    }).map(function(item){
+      return {
+        owner: findFieldValue(item, fields.ownerLabel),
+        area: fields.areaLabel ? findFieldValue(item, fields.areaLabel) : ''
+      };
+    }).filter(function(x){ return x.owner; });
+
+    html += '<div class="log-stats-namelist"><h4>🧹 已完成清潔名單</h4>';
+    if(doneList.length === 0){
+      html += '<p class="log-stats-empty">' + (month === 'all' ? '尚無完成紀錄' : '這個月尚無完成紀錄') + '</p>';
+    }else{
+      html += '<div class="log-stats-name-tags">' + doneList.map(function(x){
+        var areaText = x.area ? ('（區域 ' + escapeLogHtml(x.area) + '）') : '';
+        return '<span class="log-stats-name-tag">' + escapeLogHtml(x.owner) + areaText + '</span>';
+      }).join('') + '</div>';
+    }
+    html += '</div>';
+  }
 
   body.innerHTML = html;
 }
