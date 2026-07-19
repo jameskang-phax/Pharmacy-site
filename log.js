@@ -86,6 +86,19 @@ function escapeLogHtml(str){
   });
 }
 
+/* 判斷一筆紀錄裡，是否含有「結案」欄位且已勾選／填寫（表示後台已標記為處理完畢）。
+   對應 Google 表單／試算表新增的「結案」欄位：只要那一欄有內容，且不是「否、未、尚未」這類否定字，就視為已結案。
+   欄位是空的，或整份資料根本沒有「結案」欄位，就一律視為未結案。 */
+var NEGATIVE_RESOLVED_VALUES = ['否', '未', '尚未', '未結案', 'no', 'false', '0'];
+function itemIsResolved(item){
+  return item.fields.some(function(f){
+    if(f.label.indexOf('結案') === -1) return false;
+    var v = f.value.trim();
+    if(!v) return false;
+    return NEGATIVE_RESOLVED_VALUES.indexOf(v.toLowerCase()) === -1;
+  });
+}
+
 var LOG_HEADERS = [];
 var LOG_ITEMS = [];
 
@@ -118,16 +131,8 @@ function renderLogList(items){
   }
   empty.style.display = "none";
 
-  var focusLabels = ['藥名', '批號', '效期', '數量'];
-
   list.innerHTML = items.map(function(item){
-    var fields = item.fields;
-    if(expiryOnlyMode){
-      fields = fields.filter(function(f){
-        return focusLabels.some(function(fl){ return f.label.indexOf(fl) > -1; });
-      });
-    }
-    var fieldsHtml = fields
+    var fieldsHtml = item.fields
       .filter(function(f){ return f.value && f.value.trim() !== ''; })
       .map(function(f){
         var extra = '';
@@ -137,14 +142,23 @@ function renderLogList(items){
         }
         return '<dt>' + escapeLogHtml(f.label) + '</dt><dd>' + formatLogValue(f.value) + extra + '</dd>';
       }).join('');
-    return '<div class="log-item">' +
-      '<div class="log-date">' + escapeLogHtml(item.ts) + '</div>' +
+
+    var resolveHtml = '';
+    var cardClass = 'log-item';
+    if(itemIsResolved(item)){
+      cardClass += ' is-resolved';
+      resolveHtml = '<span class="log-resolve-badge">✓ 已結案</span>';
+    }
+
+    return '<div class="' + cardClass + '">' +
+      '<div class="log-date">' + escapeLogHtml(item.ts) + resolveHtml + '</div>' +
       '<dl class="log-fields">' + fieldsHtml + '</dl>' +
     '</div>';
   }).join("");
 }
 
 var expiryOnlyMode = false;
+var showResolvedMode = false;
 
 function searchLog(keyword){
   var k = keyword.trim().toLowerCase();
@@ -158,28 +172,51 @@ function searchLog(keyword){
   if(expiryOnlyMode){
     base = base.filter(itemHasExpiryAlert);
   }
+  if(!showResolvedMode){
+    base = base.filter(function(item){ return !itemIsResolved(item); });
+  }
   return base;
 }
 
-/* 若這份資料含有「效期」欄位，動態插入一個篩選開關；沒有的話（例如其他表單）就不會出現，不用另外改 HTML */
+/* 若這份資料含有「效期」或「結案」欄位，動態插入對應的篩選開關；
+   沒有的話（例如其他表單）就不會出現，不用另外改 HTML */
 function ensureExpiryFilterUI(){
   if(document.getElementById('expiry-filter-wrap')) return;
   var hasExpiryField = LOG_HEADERS.some(function(h){ return h.indexOf('效期') > -1; });
-  if(!hasExpiryField) return;
-
-  var wrap = document.createElement('label');
-  wrap.id = 'expiry-filter-wrap';
-  wrap.className = 'expiry-filter-wrap';
-  wrap.innerHTML = '<input type="checkbox" id="expiry-filter-checkbox"> 只顯示含即期／過期品項的紀錄';
+  var hasResolvedField = LOG_HEADERS.some(function(h){ return h.indexOf('結案') > -1; });
+  if(!hasExpiryField && !hasResolvedField) return;
 
   var searchBox = document.querySelector('.search-box');
-  searchBox.parentNode.insertBefore(wrap, searchBox.nextSibling);
+  var lastInserted = searchBox;
 
-  document.getElementById('expiry-filter-checkbox').addEventListener('change', function(e){
-    expiryOnlyMode = e.target.checked;
-    var input = document.getElementById('q');
-    renderLogList(searchLog(input.value));
-  });
+  if(hasExpiryField){
+    var wrap = document.createElement('label');
+    wrap.id = 'expiry-filter-wrap';
+    wrap.className = 'expiry-filter-wrap';
+    wrap.innerHTML = '<input type="checkbox" id="expiry-filter-checkbox"> 只顯示含即期／過期品項的紀錄';
+    searchBox.parentNode.insertBefore(wrap, lastInserted.nextSibling);
+    lastInserted = wrap;
+    document.getElementById('expiry-filter-checkbox').addEventListener('change', function(e){
+      expiryOnlyMode = e.target.checked;
+      var input = document.getElementById('q');
+      renderLogList(searchLog(input.value));
+    });
+  }
+
+  if(hasResolvedField){
+    /* 後台在試算表把「結案」欄位填上內容後，該筆紀錄預設會被隱藏，清單只留下還沒處理的。
+       這個開關是給需要回頭查「已經結案的紀錄」時用的，預設不勾＝隱藏已結案。 */
+    var resolvedWrap = document.createElement('label');
+    resolvedWrap.id = 'show-resolved-wrap';
+    resolvedWrap.className = 'expiry-filter-wrap';
+    resolvedWrap.innerHTML = '<input type="checkbox" id="show-resolved-checkbox"> 顯示已結案的紀錄';
+    searchBox.parentNode.insertBefore(resolvedWrap, lastInserted.nextSibling);
+    document.getElementById('show-resolved-checkbox').addEventListener('change', function(e){
+      showResolvedMode = e.target.checked;
+      var input = document.getElementById('q');
+      renderLogList(searchLog(input.value));
+    });
+  }
 }
 
 function loadLogData(){

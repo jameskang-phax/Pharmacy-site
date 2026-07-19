@@ -1072,6 +1072,30 @@ footer{
   border-radius:6px;
   padding:16px 18px;
   margin-bottom:12px;
+  transition:opacity .15s ease;
+}
+.log-item.is-resolved{
+  border-left-color:var(--line);
+  opacity:.55;
+}
+.log-item.is-resolved .log-fields{
+  text-decoration:line-through;
+  text-decoration-color:var(--ink-soft);
+}
+.log-resolve-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  margin-left:auto;
+  padding:2px 10px;
+  border-radius:999px;
+  border:1px solid var(--teal);
+  background:#fff;
+  color:var(--teal-dark);
+  font-family:'Noto Sans TC', sans-serif;
+  font-weight:700;
+  font-size:12px;
+  white-space:nowrap;
 }
 .log-date{
   font-family:'IBM Plex Mono', monospace;
