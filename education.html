@@ -633,6 +633,13 @@
 
 </main>
 
+<div class="edu-lightbox" id="edu-lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+  <button type="button" class="edu-lightbox-close" id="edu-lightbox-close" aria-label="關閉放大圖片">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <img id="edu-lightbox-img" src="" alt="">
+</div>
+
 <footer>
   <div class="wrap">麻豆新樓醫院藥劑科工作站 · 衛教內容僅供參考，個別用藥請依醫師與藥師指示</div>
 </footer>
@@ -668,6 +675,37 @@ eduBackBtn.addEventListener('click', function(){
   eduTileGrid.style.display = 'grid';
   eduBackBtn.style.display = 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* 衛教圖卡：點圖片可以放大檢視，點空白處／關閉鈕／Esc 都能關閉 */
+var eduLightbox = document.getElementById('edu-lightbox');
+var eduLightboxImg = document.getElementById('edu-lightbox-img');
+var eduLightboxClose = document.getElementById('edu-lightbox-close');
+
+function openEduLightbox(img){
+  eduLightboxImg.src = img.src;
+  eduLightboxImg.alt = img.alt || '';
+  eduLightbox.classList.add('is-open');
+  eduLightbox.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+function closeEduLightbox(){
+  eduLightbox.classList.remove('is-open');
+  eduLightbox.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  eduLightboxImg.src = '';
+}
+
+document.addEventListener('click', function(e){
+  var img = e.target.closest('.edu-media img');
+  if(img){ openEduLightbox(img); }
+});
+eduLightboxClose.addEventListener('click', closeEduLightbox);
+eduLightbox.addEventListener('click', function(e){
+  if(e.target === eduLightbox){ closeEduLightbox(); }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && eduLightbox.classList.contains('is-open')){ closeEduLightbox(); }
 });
 </script>
 
