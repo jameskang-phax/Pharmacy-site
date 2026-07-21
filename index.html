@@ -6,6 +6,12 @@
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
 <title>麻豆新樓醫院藥劑科工作站</title>
 <link rel="stylesheet" href="styles.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A4F44">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="藥劑科工作站">
 </head>
 <body>
 
@@ -143,13 +149,10 @@
         <span class="num">03</span>
         <h2>藥劑科公告事項</h2>
         <span class="rule"></span>
-        <div class="mascot-float" id="mascot-float">
-          <span class="mascot-speech">嗨，我是藥神丸子</span>
-          <img id="mascot-img" src="images/yao-shen-wan.png" alt="藥神丸吉祥物，點一下跟我打招呼" loading="lazy" role="button" tabindex="0">
+        <div class="mascot-float" aria-hidden="true">
+          <img src="images/yao-shen-wan.jpg" alt="藥神丸吉祥物" loading="lazy">
         </div>
       </div>
-
-      <p class="announce-tagline">掌握藥劑科即時消息，置頂公告不錯過。<span class="announce-stats" id="announce-stats"></span></p>
 
       <div class="announce-actions">
         <a class="announce-add-btn" href="https://forms.gle/kUX38uAgRRcqjGCy5" target="_blank" rel="noopener">
@@ -169,6 +172,26 @@
   </div>
 
 </main>
+
+<div class="edu-lightbox" id="edu-lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+  <button type="button" class="edu-lightbox-close" id="edu-lightbox-close" aria-label="關閉放大圖片">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <img id="edu-lightbox-img" src="" alt="">
+</div>
+
+<div class="announce-modal" id="announce-modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="announce-modal-card">
+    <button type="button" class="announce-modal-close" id="announce-modal-close" aria-label="關閉">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <span class="announce-modal-pin" id="announce-modal-pin" style="display:none;">📌 置頂</span>
+    <div class="announce-modal-date" id="announce-modal-date"></div>
+    <h3 class="announce-modal-title" id="announce-modal-title"></h3>
+    <p class="announce-modal-body" id="announce-modal-body"></p>
+    <div class="announce-modal-attachments" id="announce-modal-attachments"></div>
+  </div>
+</div>
 
 <footer>
   <div class="wrap">麻豆新樓醫院藥劑科工作站 · 內部使用 · 若表單涉及病人資料，請先確認符合院內個資規範</div>
@@ -200,35 +223,6 @@ document.querySelectorAll('.tile[data-target]').forEach(function(tile){
     }
   });
 });
-
-/* 藥神丸子：點一下（或用鍵盤 Enter/空白鍵）搖擺一下打招呼 */
-(function(){
-  var mascotWrap = document.getElementById('mascot-float');
-  var mascotImg = document.getElementById('mascot-img');
-  if(!mascotWrap || !mascotImg) return;
-  var mascotSpeechEl = mascotWrap.querySelector('.mascot-speech');
-  var mascotMessages = ['嗨，我是藥神丸子','記得洗手，才安心 🧼','公告別忘了看一下喔','辛苦了，喝口水吧','按時吃藥，健康久久','有問題找我，別客氣'];
-  var mascotMsgIndex = 0;
-  function playWiggle(){
-    mascotWrap.classList.remove('is-clicked');
-    void mascotWrap.offsetWidth; /* 強制重新觸發動畫 */
-    mascotWrap.classList.add('is-clicked');
-    if(mascotSpeechEl){
-      mascotMsgIndex = (mascotMsgIndex + 1) % mascotMessages.length;
-      mascotSpeechEl.textContent = mascotMessages[mascotMsgIndex];
-    }
-  }
-  mascotWrap.addEventListener('animationend', function(e){
-    if(e.target === mascotImg) mascotWrap.classList.remove('is-clicked');
-  });
-  mascotImg.addEventListener('click', playWiggle);
-  mascotImg.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' || e.key === ' '){
-      e.preventDefault();
-      playWiggle();
-    }
-  });
-})();
 
 /* 頂部三個快捷按鈕（藥品查詢／儲位查詢／現場作業Q&A）都需要通行碼 */
 ['btn-drug-lookup','btn-storage','btn-abnormal'].forEach(function(id){
@@ -367,35 +361,60 @@ function renderAnnouncements(rows){
     listEl.innerHTML = '';
     emptyEl.style.display = 'block';
     toggleWrap.innerHTML = '';
-    var statsEmptyEl = document.getElementById('announce-stats');
-    if(statsEmptyEl) statsEmptyEl.textContent = '';
     return;
   }
   emptyEl.style.display = 'none';
-
-  var statsEl = document.getElementById('announce-stats');
-  if(statsEl){
-    var pinnedCount = items.filter(function(i){ return i.pinned; }).length;
-    statsEl.textContent = '共 ' + items.length + ' 則' + (pinnedCount > 0 ? '・置頂 ' + pinnedCount + ' 則' : '');
-  }
 
   var LIMIT = 10;
   var visibleItems = items.slice(0, LIMIT);
   var hiddenItems = items.slice(LIMIT);
 
+  /* 從 Google 雲端硬碟分享連結取出檔案 ID，轉換成縮圖網址 */
+  function driveFileId(url){
+    var m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : null;
+  }
+
   function attachmentHtml(attachment){
     if(!attachment) return '';
     var links = attachment.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s !== ''; });
     if(links.length === 0) return '';
+
     var linksHtml = links.map(function(url, i){
       var label = links.length > 1 ? ('📎 附件 ' + (i + 1)) : '📎 查看附件';
-      return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="announce-attachment">' + label + '</a>';
+      var fileId = driveFileId(url);
+      if(!fileId){
+        return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="announce-attachment">' + label + '</a>';
+      }
+      var thumbUrl = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w800';
+      // 先嘗試當圖片縮圖顯示；如果載入失敗（代表不是圖片檔），onerror 會呼叫 handleAttachmentImgError 換成原本的「查看附件」按鈕
+      return '<span class="announce-attachment-wrap">' +
+        '<img src="' + escapeHtml(thumbUrl) + '" alt="公告附件圖片，點擊放大" class="announce-attachment-thumb" loading="lazy" ' +
+          'data-fallback-url="' + escapeHtml(url) + '" data-fallback-label="' + escapeHtml(label) + '" ' +
+          'onerror="handleAttachmentImgError(this)">' +
+      '</span>';
     }).join('');
     return '<div class="announce-attachments">' + linksHtml + '</div>';
   }
 
-  function itemHtml(item){
-    return '<div class="announce-item' + (item.pinned ? ' is-pinned' : '') + '">' +
+  function handleAttachmentImgError(img){
+    var url = img.getAttribute('data-fallback-url');
+    var label = img.getAttribute('data-fallback-label');
+    var a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.className = 'announce-attachment';
+    a.textContent = label;
+    var wrap = img.closest('.announce-attachment-wrap');
+    (wrap || img).replaceWith(a);
+  }
+  // 讓這兩個函式可以被 inline onerror 屬性、以及公告放大彈窗的程式碼呼叫到
+  window.attachmentHtml = attachmentHtml;
+  window.handleAttachmentImgError = handleAttachmentImgError;
+
+  function itemHtml(item, idx){
+    return '<div class="announce-item' + (item.pinned ? ' is-pinned' : '') + '" data-announce-index="' + idx + '" tabindex="0" role="button" aria-label="點擊查看完整公告內容">' +
       (item.pinned ? '<span class="announce-pin-badge">📌 置頂</span>' : '') +
       '<div class="announce-date">' + formatTimestamp(item.ts) + '</div>' +
       '<div class="announce-title">' + escapeHtml(item.title) + '</div>' +
@@ -404,8 +423,10 @@ function renderAnnouncements(rows){
     '</div>';
   }
 
+  window.ANNOUNCE_ITEMS = items;
+
   listEl.innerHTML = visibleItems.map(itemHtml).join('') +
-    (hiddenItems.length > 0 ? '<div class="announce-hidden" id="announce-hidden">' + hiddenItems.map(itemHtml).join('') + '</div>' : '');
+    (hiddenItems.length > 0 ? '<div class="announce-hidden" id="announce-hidden">' + hiddenItems.map(function(item){ return itemHtml(item, items.indexOf(item)); }).join('') + '</div>' : '');
 
   if(hiddenItems.length > 0){
     toggleWrap.innerHTML = '<button class="announce-toggle" id="announce-toggle-btn" type="button">顯示全部 ' + items.length + ' 則公告</button>';
@@ -459,7 +480,86 @@ fetch('https://abacus.jasoncameron.dev/hit/sinlau-pharmacy-jameskang-phax/total-
   .catch(function(){
     document.getElementById('visit-count').textContent = '—';
   });
+
+/* 公告附件縮圖：點擊可以放大檢視，點空白處／關閉鈕／Esc 都能關閉 */
+var eduLightbox = document.getElementById('edu-lightbox');
+var eduLightboxImg = document.getElementById('edu-lightbox-img');
+var eduLightboxClose = document.getElementById('edu-lightbox-close');
+
+function openEduLightbox(img){
+  eduLightboxImg.src = img.src;
+  eduLightboxImg.alt = img.alt || '';
+  eduLightbox.classList.add('is-open');
+  eduLightbox.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+function closeEduLightbox(){
+  eduLightbox.classList.remove('is-open');
+  eduLightbox.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  eduLightboxImg.src = '';
+}
+
+document.addEventListener('click', function(e){
+  var img = e.target.closest('.announce-attachment-thumb');
+  if(img){ openEduLightbox(img); }
+});
+eduLightboxClose.addEventListener('click', closeEduLightbox);
+eduLightbox.addEventListener('click', function(e){
+  if(e.target === eduLightbox){ closeEduLightbox(); }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && eduLightbox.classList.contains('is-open')){ closeEduLightbox(); }
+});
+
+/* 公告事項：點卡片可以放大看完整內容（點縮圖或查看附件連結時不觸發，維持原本行為） */
+var announceModal = document.getElementById('announce-modal');
+var announceModalClose = document.getElementById('announce-modal-close');
+
+function openAnnounceModal(idx){
+  var item = (window.ANNOUNCE_ITEMS || [])[idx];
+  if(!item) return;
+  document.getElementById('announce-modal-pin').style.display = item.pinned ? 'inline-flex' : 'none';
+  document.getElementById('announce-modal-date').textContent = formatTimestamp(item.ts);
+  document.getElementById('announce-modal-title').textContent = item.title;
+  var bodyEl = document.getElementById('announce-modal-body');
+  bodyEl.textContent = item.body || '';
+  bodyEl.style.display = item.body ? 'block' : 'none';
+  document.getElementById('announce-modal-attachments').innerHTML = attachmentHtmlForModal(item.attachment);
+  announceModal.classList.add('is-open');
+  announceModal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+function closeAnnounceModal(){
+  announceModal.classList.remove('is-open');
+  announceModal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+/* 彈窗裡的附件用原本網站已有的 attachmentHtml 邏輯（renderAnnouncements 內定義），
+   這裡另外包一層以防該函式尚未定義（例如公告資料還沒載入完成） */
+function attachmentHtmlForModal(attachment){
+  return (window.attachmentHtml && attachment) ? window.attachmentHtml(attachment) : '';
+}
+
+document.addEventListener('click', function(e){
+  if(e.target.closest('.announce-attachment-thumb, .announce-attachment')) return;
+  var card = e.target.closest('.announce-item');
+  if(card){ openAnnounceModal(+card.getAttribute('data-announce-index')); }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && document.activeElement && document.activeElement.classList.contains('announce-item')){
+    openAnnounceModal(+document.activeElement.getAttribute('data-announce-index'));
+  }
+});
+announceModalClose.addEventListener('click', closeAnnounceModal);
+announceModal.addEventListener('click', function(e){
+  if(e.target === announceModal){ closeAnnounceModal(); }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && announceModal.classList.contains('is-open')){ closeAnnounceModal(); }
+});
 </script>
 
+<script src="pwa-register.js"></script>
 </body>
 </html>
