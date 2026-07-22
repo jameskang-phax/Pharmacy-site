@@ -1464,3 +1464,124 @@ a[x-apple-data-detectors],
   .mascot-float{ animation:none; }
   .mascot-float.is-clicked img{ animation:none; }
 }
+
+/* ---------- 每月統計面板（件數／通報人次／處方來源／錯誤類型） ---------- */
+.log-stats-panel{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:18px 20px;
+  margin:0 0 24px;
+}
+.log-stats-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.log-stats-head h3{
+  font-family:'Noto Serif TC', serif;
+  font-size:17px;
+  margin:0;
+}
+.log-stats-head select{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:13px;
+  color:var(--ink);
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:6px 10px;
+  cursor:pointer;
+}
+.log-stats-total{
+  font-size:14px;
+  color:var(--ink-soft);
+  margin:0 0 16px;
+}
+.log-stats-total strong{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:22px;
+  color:var(--teal-dark);
+  margin:0 4px;
+}
+.log-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+  gap:14px;
+}
+.log-stats-block{
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:12px 14px;
+  background:var(--bg);
+  min-width:0;
+}
+.log-stats-block h4{
+  font-size:13px;
+  color:var(--ink-soft);
+  margin:0 0 8px;
+  font-weight:700;
+}
+.log-stats-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:4px 0;
+  border-top:1px solid var(--line);
+  font-size:13px;
+  width:100%;
+}
+.log-stats-row:first-of-type{
+  border-top:none;
+}
+.log-stats-label{
+  color:var(--ink);
+  flex:1;
+  min-width:0;
+  overflow-wrap:break-word;
+}
+.log-stats-count{
+  font-family:'IBM Plex Mono', monospace;
+  color:var(--amber);
+  font-weight:700;
+  flex:none;
+  margin-left:12px;
+}
+.log-stats-empty{
+  font-size:12px;
+  color:var(--ink-soft);
+  margin:0;
+}
+.log-stats-namelist{
+  margin-top:16px;
+  padding-top:16px;
+  border-top:1px solid var(--line);
+}
+.log-stats-namelist h4{
+  font-size:13px;
+  color:var(--ink-soft);
+  margin:0 0 10px;
+  font-weight:700;
+}
+.log-stats-name-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.log-stats-name-tag{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 12px;
+  border-radius:999px;
+  background:var(--teal);
+  color:#fff;
+  font-size:13px;
+  font-weight:600;
+}
+@media (max-width:640px){
+  .log-stats-grid{ grid-template-columns:1fr; }
+}
