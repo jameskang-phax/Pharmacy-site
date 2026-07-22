@@ -149,8 +149,9 @@
         <span class="num">03</span>
         <h2>藥劑科公告事項</h2>
         <span class="rule"></span>
-        <div class="mascot-float" aria-hidden="true">
-          <img src="images/yao-shen-wan.jpg" alt="藥神丸吉祥物" loading="lazy">
+        <div class="mascot-float" id="mascot-float">
+          <span class="mascot-speech">嗨，我是藥神丸子</span>
+          <img id="mascot-img" src="images/yao-shen-wan.png" alt="藥神丸吉祥物，點一下跟我打招呼" loading="lazy" role="button" tabindex="0">
         </div>
       </div>
 
@@ -558,6 +559,35 @@ announceModal.addEventListener('click', function(e){
 document.addEventListener('keydown', function(e){
   if(e.key === 'Escape' && announceModal.classList.contains('is-open')){ closeAnnounceModal(); }
 });
+
+/* 藥神丸子：點一下（或用鍵盤 Enter/空白鍵）搖擺一下打招呼 */
+(function(){
+  var mascotWrap = document.getElementById('mascot-float');
+  var mascotImg = document.getElementById('mascot-img');
+  if(!mascotWrap || !mascotImg) return;
+  var mascotSpeechEl = mascotWrap.querySelector('.mascot-speech');
+  var mascotMessages = ['嗨，我是藥神丸子','記得洗手，才安心 🧼','公告別忘了看一下喔','辛苦了，喝口水吧','按時吃藥，健康久久','有問題找我，別客氣'];
+  var mascotMsgIndex = 0;
+  function playWiggle(){
+    mascotWrap.classList.remove('is-clicked');
+    void mascotWrap.offsetWidth; /* 強制重新觸發動畫 */
+    mascotWrap.classList.add('is-clicked');
+    if(mascotSpeechEl){
+      mascotMsgIndex = (mascotMsgIndex + 1) % mascotMessages.length;
+      mascotSpeechEl.textContent = mascotMessages[mascotMsgIndex];
+    }
+  }
+  mascotWrap.addEventListener('animationend', function(e){
+    if(e.target === mascotImg) mascotWrap.classList.remove('is-clicked');
+  });
+  mascotImg.addEventListener('click', playWiggle);
+  mascotImg.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      playWiggle();
+    }
+  });
+})();
 </script>
 
 <script src="pwa-register.js"></script>
