@@ -1277,6 +1277,21 @@ footer{
 .log-attachment:hover{
   background:#fff;
 }
+.log-attachment-wrap{
+  display:inline-block;
+  margin-right:6px;
+}
+.log-attachment-thumb{
+  width:96px;
+  height:96px;
+  object-fit:cover;
+  border-radius:8px;
+  border:1px solid var(--line);
+  cursor:zoom-in;
+  display:block;
+  transition:opacity .15s ease;
+}
+.log-attachment-thumb:hover{ opacity:.9; }
 @media (max-width:520px){
   .log-fields{ grid-template-columns:1fr; gap:2px; }
   .log-fields dt{ font-weight:700; margin-top:8px; }

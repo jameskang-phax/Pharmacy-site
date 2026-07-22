@@ -120,19 +120,98 @@ function getItemMonthKey(item, dateLabel){
 var LOG_HEADERS = [];
 var LOG_ITEMS = [];
 
+/* 從 Google 雲端硬碟分享連結取出檔案 ID，轉換成縮圖網址 */
+function driveFileId(url){
+  var m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
 function formatLogValue(value){
   var trimmed = value.trim();
   // 如果整個欄位是一個或多個網址（Google表單檔案上傳題會存成網址），
-  // 就顯示成可點擊的附件連結，而不是純文字網址
+  // 就顯示成縮圖（點擊可放大）；不是圖片檔的話會自動退回顯示可點擊的附件連結
   var parts = trimmed.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s !== ''; });
   var allUrls = parts.length > 0 && parts.every(function(p){ return /^https?:\/\//i.test(p); });
   if(allUrls){
     return parts.map(function(url, i){
       var label = parts.length > 1 ? ('📎 附件 ' + (i + 1)) : '📎 查看附件';
-      return '<a href="' + escapeLogHtml(url) + '" target="_blank" rel="noopener" class="log-attachment">' + label + '</a>';
+      var fileId = driveFileId(url);
+      if(!fileId){
+        return '<a href="' + escapeLogHtml(url) + '" target="_blank" rel="noopener" class="log-attachment">' + label + '</a>';
+      }
+      var thumbUrl = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w800';
+      return '<span class="log-attachment-wrap">' +
+        '<img src="' + escapeLogHtml(thumbUrl) + '" alt="附件圖片，點擊放大" class="log-attachment-thumb" loading="lazy" ' +
+          'data-fallback-url="' + escapeLogHtml(url) + '" data-fallback-label="' + escapeLogHtml(label) + '" ' +
+          'onerror="handleLogAttachmentImgError(this)">' +
+      '</span>';
     }).join(' ');
   }
   return escapeLogHtml(value);
+}
+
+function handleLogAttachmentImgError(img){
+  var url = img.getAttribute('data-fallback-url');
+  var label = img.getAttribute('data-fallback-label');
+  var a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.className = 'log-attachment';
+  a.textContent = label;
+  var wrap = img.closest('.log-attachment-wrap');
+  (wrap || img).replaceWith(a);
+}
+
+/* 圖片放大檢視（Lightbox）：如果頁面上還沒有，動態建立一份共用的 */
+function ensureLogLightbox(){
+  if(document.getElementById('log-lightbox')) return;
+  var box = document.createElement('div');
+  box.className = 'edu-lightbox';
+  box.id = 'log-lightbox';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-hidden', 'true');
+  box.innerHTML =
+    '<button type="button" class="edu-lightbox-close" id="log-lightbox-close" aria-label="關閉放大圖片">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>' +
+    '</button>' +
+    '<img id="log-lightbox-img" src="" alt="">';
+  document.body.appendChild(box);
+
+  var lightbox = box;
+  var lightboxImg = document.getElementById('log-lightbox-img');
+  var lightboxClose = document.getElementById('log-lightbox-close');
+
+  function openLb(img){
+    lightboxImg.src = img.src;
+    lightboxImg.alt = img.alt || '';
+    lightbox.classList.add('is-open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLb(){
+    lightbox.classList.remove('is-open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    lightboxImg.src = '';
+  }
+  document.addEventListener('click', function(e){
+    var img = e.target.closest('.log-attachment-thumb');
+    if(img){ openLb(img); }
+  });
+  lightboxClose.addEventListener('click', closeLb);
+  lightbox.addEventListener('click', function(e){
+    if(e.target === lightbox){ closeLb(); }
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && lightbox.classList.contains('is-open')){ closeLb(); }
+  });
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', ensureLogLightbox);
+}else{
+  ensureLogLightbox();
 }
 
 function renderLogList(items){
