@@ -167,6 +167,7 @@
 
       <div class="announce-list" id="announce-list"></div>
       <div class="announce-toggle-wrap" id="announce-toggle-wrap"></div>
+      <div class="announce-ended-wrap" id="announce-ended-wrap"></div>
       <p class="announce-empty" id="announce-empty" style="display:none;">目前還沒有公告。</p>
       <p class="announce-error" id="announce-error" style="display:none;">公告載入失敗，請確認網路連線，或稍後再試一次。</p>
     </section>
@@ -345,13 +346,16 @@ function renderAnnouncements(rows){
     }
     return 4;
   })();
+  var colEnded = findCol('結束', -1);
 
   var dataRows = rows.slice(1);
   var items = dataRows.map(function(r){
     var pinRaw = (r[colPinned] || '').trim();
     var isPinned = pinRaw === '是' || pinRaw.toLowerCase() === 'yes' || pinRaw.toLowerCase() === 'true';
     var attachmentRaw = (r[colAttachment] || '').trim();
-    return { ts: r[0] || '', title: r[colTitle] || '', body: r[colBody] || '', pinned: isPinned, attachment: attachmentRaw };
+    // 結束公告是打勾題，Google表單勾選後會存成選項文字（非空字串），沒勾就是空白
+    var isEnded = colEnded > -1 && (r[colEnded] || '').trim() !== '';
+    return { ts: r[0] || '', title: r[colTitle] || '', body: r[colBody] || '', pinned: isPinned, attachment: attachmentRaw, ended: isEnded };
   }).filter(function(item){ return item.title.trim() !== ''; });
 
   items.sort(function(a,b){
@@ -374,8 +378,10 @@ function renderAnnouncements(rows){
   emptyEl.style.display = 'none';
 
   var LIMIT = 10;
-  var visibleItems = items.slice(0, LIMIT);
-  var hiddenItems = items.slice(LIMIT);
+  var activeItems = items.filter(function(i){ return !i.ended; });
+  var endedItems = items.filter(function(i){ return i.ended; });
+  var visibleItems = activeItems.slice(0, LIMIT);
+  var hiddenItems = activeItems.slice(LIMIT);
 
   /* 從 Google 雲端硬碟分享連結取出檔案 ID，轉換成縮圖網址 */
   function driveFileId(url){
@@ -422,8 +428,9 @@ function renderAnnouncements(rows){
   window.handleAttachmentImgError = handleAttachmentImgError;
 
   function itemHtml(item, idx){
-    return '<div class="announce-item' + (item.pinned ? ' is-pinned' : '') + '" data-announce-index="' + idx + '" tabindex="0" role="button" aria-label="點擊查看完整公告內容">' +
+    return '<div class="announce-item' + (item.pinned ? ' is-pinned' : '') + (item.ended ? ' is-ended' : '') + '" data-announce-index="' + idx + '" tabindex="0" role="button" aria-label="點擊查看完整公告內容">' +
       (item.pinned ? '<span class="announce-pin-badge">📌 置頂</span>' : '') +
+      (item.ended ? '<span class="announce-ended-badge">已結束</span>' : '') +
       '<div class="announce-date">' + formatTimestamp(item.ts) + '</div>' +
       '<div class="announce-title">' + escapeHtml(item.title) + '</div>' +
       (item.body ? '<div class="announce-body">' + escapeHtml(item.body) + '</div>' : '') +
@@ -437,15 +444,34 @@ function renderAnnouncements(rows){
     (hiddenItems.length > 0 ? '<div class="announce-hidden" id="announce-hidden">' + hiddenItems.map(function(item){ return itemHtml(item, items.indexOf(item)); }).join('') + '</div>' : '');
 
   if(hiddenItems.length > 0){
-    toggleWrap.innerHTML = '<button class="announce-toggle" id="announce-toggle-btn" type="button">顯示全部 ' + items.length + ' 則公告</button>';
+    toggleWrap.innerHTML = '<button class="announce-toggle" id="announce-toggle-btn" type="button">顯示全部 ' + activeItems.length + ' 則公告</button>';
     document.getElementById('announce-toggle-btn').addEventListener('click', function(){
       var hiddenEl = document.getElementById('announce-hidden');
       var isOpen = hiddenEl.classList.contains('is-open');
       hiddenEl.classList.toggle('is-open');
-      this.textContent = isOpen ? ('顯示全部 ' + items.length + ' 則公告') : '收合公告';
+      this.textContent = isOpen ? ('顯示全部 ' + activeItems.length + ' 則公告') : '收合公告';
     });
   }else{
     toggleWrap.innerHTML = '';
+  }
+
+  var endedWrapEl = document.getElementById('announce-ended-wrap');
+  if(endedWrapEl){
+    if(endedItems.length > 0){
+      endedWrapEl.innerHTML =
+        '<button class="announce-toggle announce-toggle-ended" id="announce-ended-btn" type="button">顯示已結束的公告（' + endedItems.length + ' 則）</button>' +
+        '<div class="announce-ended-list" id="announce-ended-list">' +
+          endedItems.map(function(item){ return itemHtml(item, items.indexOf(item)); }).join('') +
+        '</div>';
+      document.getElementById('announce-ended-btn').addEventListener('click', function(){
+        var endedListEl = document.getElementById('announce-ended-list');
+        var isOpen = endedListEl.classList.contains('is-open');
+        endedListEl.classList.toggle('is-open');
+        this.textContent = isOpen ? ('顯示已結束的公告（' + endedItems.length + ' 則）') : '收合已結束的公告';
+      });
+    }else{
+      endedWrapEl.innerHTML = '';
+    }
   }
 }
 

@@ -1193,6 +1193,35 @@ footer{
   font-size:13px;
   padding:24px 0;
 }
+.announce-item.is-ended{
+  opacity:0.7;
+}
+.announce-ended-badge{
+  display:inline-block;
+  font-size:11px;
+  font-weight:700;
+  color:var(--ink-soft);
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:2px 9px;
+  margin-bottom:6px;
+  margin-right:6px;
+}
+.announce-ended-wrap{
+  margin-top:14px;
+  text-align:center;
+}
+.announce-ended-list{
+  display:none;
+  flex-direction:column;
+  gap:10px;
+  margin-top:14px;
+  text-align:left;
+}
+.announce-ended-list.is-open{
+  display:flex;
+}
 .announce-error{
   text-align:center;
   color:var(--alert);
