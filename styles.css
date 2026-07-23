@@ -1385,7 +1385,7 @@ a[x-apple-data-detectors],
 .announce .section-head{
   position:relative;
   padding-right:98px;
-  margin-bottom:14px;
+  margin-bottom:110px;
 }
 .announce .announce-actions,
 .announce .announce-note,
@@ -1458,7 +1458,7 @@ a[x-apple-data-detectors],
 @media (min-width:640px){
   .mascot-float{ width:96px; top:-10px; }
   .mascot-speech{ font-size:12px; }
-  .announce .section-head{ padding-right:118px; }
+  .announce .section-head{ padding-right:118px; margin-bottom:140px; }
   .announce .announce-actions,
   .announce .announce-note,
   .announce .announce-tagline{ padding-right:118px; }
