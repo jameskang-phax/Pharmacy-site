@@ -155,6 +155,8 @@
         </div>
       </div>
 
+      <p class="announce-tagline">掌握藥劑科即時消息，置頂公告不錯過。<span class="announce-stats" id="announce-stats"></span></p>
+
       <div class="announce-actions">
         <a class="announce-add-btn" href="https://forms.gle/kUX38uAgRRcqjGCy5" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
@@ -356,6 +358,12 @@ function renderAnnouncements(rows){
     if(a.pinned !== b.pinned) return a.pinned ? -1 : 1;
     return parseZhTimestamp(b.ts) - parseZhTimestamp(a.ts);
   });
+
+  var statsEl = document.getElementById('announce-stats');
+  if(statsEl){
+    var pinnedCount = items.filter(function(i){ return i.pinned; }).length;
+    statsEl.textContent = '共' + items.length + '則、置頂' + pinnedCount + '則';
+  }
 
   if(items.length === 0){
     listEl.innerHTML = '';

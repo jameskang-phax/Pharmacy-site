@@ -934,6 +934,16 @@ footer{
 .announce{
   margin:56px 0 60px;
 }
+.announce-tagline{
+  font-size:14px;
+  color:var(--ink-soft);
+  margin:0 0 16px;
+}
+.announce-stats{
+  font-family:'IBM Plex Mono', monospace;
+  color:var(--teal-dark);
+  font-weight:700;
+}
 .announce-actions{
   display:flex;
   align-items:center;
