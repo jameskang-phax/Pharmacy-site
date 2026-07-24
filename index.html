@@ -165,6 +165,15 @@
         <button class="announce-refresh" id="announce-refresh" type="button">重新整理</button>
       </div>
 
+      <div class="announce-search-wrap">
+        <svg class="announce-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" class="announce-search-input" id="announce-search" placeholder="輸入關鍵字搜尋任何欄位內容…" autocomplete="off" aria-label="搜尋公告">
+        <button type="button" class="announce-search-clear" id="announce-search-clear" aria-label="清除搜尋" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <p class="announce-search-result" id="announce-search-result" style="display:none;"></p>
+
       <div class="announce-list" id="announce-list"></div>
       <div class="announce-toggle-wrap" id="announce-toggle-wrap"></div>
       <div class="announce-ended-wrap" id="announce-ended-wrap"></div>
@@ -355,7 +364,10 @@ function renderAnnouncements(rows){
     var attachmentRaw = (r[colAttachment] || '').trim();
     // 結束公告是打勾題，Google表單勾選後會存成選項文字（非空字串），沒勾就是空白
     var isEnded = colEnded > -1 && (r[colEnded] || '').trim() !== '';
-    return { ts: r[0] || '', title: r[colTitle] || '', body: r[colBody] || '', pinned: isPinned, attachment: attachmentRaw, ended: isEnded };
+    // 搜尋用文字：把這一列所有欄位（含表單裡任何額外欄位）都串起來，
+    // 這樣「搜尋任何欄位內容」才是真的涵蓋整列資料，不只有標題跟內容。
+    var searchText = r.join(' ').toLowerCase();
+    return { ts: r[0] || '', title: r[colTitle] || '', body: r[colBody] || '', pinned: isPinned, attachment: attachmentRaw, ended: isEnded, searchText: searchText };
   }).filter(function(item){ return item.title.trim() !== ''; });
 
   items.sort(function(a,b){
@@ -363,25 +375,83 @@ function renderAnnouncements(rows){
     return parseZhTimestamp(b.ts) - parseZhTimestamp(a.ts);
   });
 
-  var statsEl = document.getElementById('announce-stats');
-  if(statsEl){
-    var pinnedCount = items.filter(function(i){ return i.pinned; }).length;
-    statsEl.textContent = '共' + items.length + '則、置頂' + pinnedCount + '則';
-  }
+  // allItems 保留完整、未過濾的清單：彈窗放大功能是靠這份清單的索引找資料，
+  // 不管目前搜尋框有沒有在過濾畫面上顯示的卡片，索引都要對得上這份清單。
+  window.ANNOUNCE_ITEMS = items;
 
   if(items.length === 0){
     listEl.innerHTML = '';
     emptyEl.style.display = 'block';
     toggleWrap.innerHTML = '';
+    var endedWrapElEmpty = document.getElementById('announce-ended-wrap');
+    if(endedWrapElEmpty) endedWrapElEmpty.innerHTML = '';
+    var statsElEmpty = document.getElementById('announce-stats');
+    if(statsElEmpty) statsElEmpty.textContent = '';
+    var searchResultElEmpty = document.getElementById('announce-search-result');
+    if(searchResultElEmpty) searchResultElEmpty.style.display = 'none';
     return;
   }
   emptyEl.style.display = 'none';
 
+  applyAnnounceSearch();
+}
+
+/* 依目前搜尋框關鍵字，從完整清單(window.ANNOUNCE_ITEMS)過濾後重新畫出公告列表。
+   搜尋框變動、或每次重新整理拿到新資料後，都會呼叫這個函式。 */
+function applyAnnounceSearch(){
+  var allItems = window.ANNOUNCE_ITEMS || [];
+  var searchInput = document.getElementById('announce-search');
+  var clearBtn = document.getElementById('announce-search-clear');
+  var resultEl = document.getElementById('announce-search-result');
+  var keyword = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+  if(clearBtn) clearBtn.style.display = keyword ? 'inline-flex' : 'none';
+
+  var items = keyword === '' ? allItems : allItems.filter(function(i){ return i.searchText.indexOf(keyword) > -1; });
+
+  if(resultEl){
+    if(keyword === ''){
+      resultEl.style.display = 'none';
+    }else{
+      resultEl.style.display = 'block';
+      resultEl.textContent = items.length > 0 ? ('找到 ' + items.length + ' 則符合「' + searchInput.value.trim() + '」的公告') : ('沒有找到符合「' + searchInput.value.trim() + '」的公告');
+    }
+  }
+
+  var listEl = document.getElementById('announce-list');
+  var toggleWrap = document.getElementById('announce-toggle-wrap');
+  var endedWrapEl = document.getElementById('announce-ended-wrap');
+  if(items.length === 0){
+    listEl.innerHTML = '';
+    toggleWrap.innerHTML = '';
+    if(endedWrapEl) endedWrapEl.innerHTML = '';
+    return;
+  }
+  renderAnnounceList(items, keyword !== '');
+}
+
+/* 實際畫出公告卡片、展開按鈕、已結束公告區塊。
+   items 是「目前要顯示」的清單（可能是全部，也可能是搜尋後過濾的結果），
+   但每張卡片的 data-announce-index 一律用 window.ANNOUNCE_ITEMS（完整清單）的索引，
+   這樣點卡片放大時，openAnnounceModal 才找得到正確的那一則。 */
+function renderAnnounceList(items, isSearching){
+  var allItems = window.ANNOUNCE_ITEMS || items;
+  var listEl = document.getElementById('announce-list');
+  var toggleWrap = document.getElementById('announce-toggle-wrap');
+
+  var statsEl = document.getElementById('announce-stats');
+  if(statsEl && !isSearching){
+    var pinnedCount = items.filter(function(i){ return i.pinned; }).length;
+    statsEl.textContent = '共' + items.length + '則、置頂' + pinnedCount + '則';
+  }
+
+  // 搜尋時直接把符合的結果全部顯示出來（不分頁），方便找到就好；
+  // 沒有在搜尋時才維持原本「只顯示前10則＋顯示全部按鈕」的邏輯。
   var LIMIT = 10;
   var activeItems = items.filter(function(i){ return !i.ended; });
   var endedItems = items.filter(function(i){ return i.ended; });
-  var visibleItems = activeItems.slice(0, LIMIT);
-  var hiddenItems = activeItems.slice(LIMIT);
+  var visibleItems = isSearching ? activeItems : activeItems.slice(0, LIMIT);
+  var hiddenItems = isSearching ? [] : activeItems.slice(LIMIT);
 
   /* 從 Google 雲端硬碟分享連結取出檔案 ID，轉換成縮圖網址 */
   function driveFileId(url){
@@ -438,10 +508,8 @@ function renderAnnouncements(rows){
     '</div>';
   }
 
-  window.ANNOUNCE_ITEMS = items;
-
-  listEl.innerHTML = visibleItems.map(itemHtml).join('') +
-    (hiddenItems.length > 0 ? '<div class="announce-hidden" id="announce-hidden">' + hiddenItems.map(function(item){ return itemHtml(item, items.indexOf(item)); }).join('') + '</div>' : '');
+  listEl.innerHTML = visibleItems.map(function(item){ return itemHtml(item, allItems.indexOf(item)); }).join('') +
+    (hiddenItems.length > 0 ? '<div class="announce-hidden" id="announce-hidden">' + hiddenItems.map(function(item){ return itemHtml(item, allItems.indexOf(item)); }).join('') + '</div>' : '');
 
   if(hiddenItems.length > 0){
     toggleWrap.innerHTML = '<button class="announce-toggle" id="announce-toggle-btn" type="button">顯示全部 ' + activeItems.length + ' 則公告</button>';
@@ -461,7 +529,7 @@ function renderAnnouncements(rows){
       endedWrapEl.innerHTML =
         '<button class="announce-toggle announce-toggle-ended" id="announce-ended-btn" type="button">顯示已結束的公告（' + endedItems.length + ' 則）</button>' +
         '<div class="announce-ended-list" id="announce-ended-list">' +
-          endedItems.map(function(item){ return itemHtml(item, items.indexOf(item)); }).join('') +
+          endedItems.map(function(item){ return itemHtml(item, allItems.indexOf(item)); }).join('') +
         '</div>';
       document.getElementById('announce-ended-btn').addEventListener('click', function(){
         var endedListEl = document.getElementById('announce-ended-list');
@@ -505,6 +573,25 @@ function loadAnnouncements(){
 
 document.getElementById('announce-refresh').addEventListener('click', loadAnnouncements);
 loadAnnouncements();
+
+/* 公告搜尋欄：輸入時即時過濾（用短暫延遲避免每打一個字就重畫整個列表） */
+(function(){
+  var searchInput = document.getElementById('announce-search');
+  var clearBtn = document.getElementById('announce-search-clear');
+  if(!searchInput) return;
+  var debounceTimer = null;
+  searchInput.addEventListener('input', function(){
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(applyAnnounceSearch, 150);
+  });
+  if(clearBtn){
+    clearBtn.addEventListener('click', function(){
+      searchInput.value = '';
+      applyAnnounceSearch();
+      searchInput.focus();
+    });
+  }
+})();
 
 fetch('https://abacus.jasoncameron.dev/hit/sinlau-pharmacy-jameskang-phax/total-visits')
   .then(function(res){ return res.json(); })
