@@ -1324,6 +1324,10 @@ footer{
   color:#791F1F;
   background:#F7C1C1;
 }
+.log-expiry-urgent{
+  color:#8A1F1F;
+  background:#F5A3A3;
+}
 .log-expiry-soon{
   color:#633806;
   background:#FAC775;

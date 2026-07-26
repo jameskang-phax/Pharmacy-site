@@ -25,23 +25,31 @@ function parseZhTimestamp(str){
   return isNaN(fallback) ? 0 : fallback;
 }
 
-/* 解析「效期」欄位，支援常見格式：2026.08、2026/08、2026-08、2026年8月
-   回傳該月最後一天的毫秒數，方便跟現在時間比較；格式不符則回傳 null（不處理，維持原樣顯示） */
+/* 解析「效期」欄位，支援常見格式：2026.08、2026/08、2026-08、2026年8月、
+   以及含日期的完整格式：2026.08.31、2026/08/31、2026年8月31日。
+   有填日期就用那一天當基準，沒填日期就用當月最後一天當基準（比較保守，提早提醒）。
+   格式不符則回傳 null（不處理，維持原樣顯示） */
 function parseExpiryDate(str){
   var s = String(str).trim();
-  var m = s.match(/^(\d{4})[.\/\-年](\d{1,2})月?$/);
+  var m = s.match(/^(\d{4})[.\/\-年](\d{1,2})月?(?:[.\/\-日](\d{1,2})日?)?$/);
   if(!m) return null;
-  var year = +m[1], month = +m[2];
+  var year = +m[1], month = +m[2], day = m[3] ? +m[3] : null;
   if(month < 1 || month > 12) return null;
+  if(day){
+    if(day < 1 || day > 31) return null;
+    return new Date(year, month - 1, day, 23, 59, 59).getTime();
+  }
   return new Date(year, month, 0).getTime();
 }
 
-/* 依效期毫秒數，判斷是否已過期或即將到期（6個月內），回傳 null 代表效期還久、不用特別提示 */
+/* 依效期毫秒數，判斷狀態：已過期／1個月內到期（較緊急）／6個月內到期，回傳 null 代表效期還久、不用特別提示 */
 function expiryStatus(ms){
   if(ms === null || ms === undefined) return null;
   var now = Date.now();
+  var oneMonthLater = now + 1000 * 60 * 60 * 24 * 30;
   var sixMonthsLater = now + 1000 * 60 * 60 * 24 * 182;
   if(ms < now) return { label: '已過期', cls: 'log-expiry-expired' };
+  if(ms < oneMonthLater) return { label: '1個月內到期', cls: 'log-expiry-urgent' };
   if(ms < sixMonthsLater) return { label: '6個月內到期', cls: 'log-expiry-soon' };
   return null;
 }
