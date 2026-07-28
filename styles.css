@@ -323,6 +323,11 @@ h1{
 .go-log{
   color:var(--amber) !important;
 }
+.go-admin{
+  color:var(--ink-soft) !important;
+  font-size:12px !important;
+  font-weight:600 !important;
+}
 
 .icon{
   width:34px; height:34px;
