@@ -94,6 +94,25 @@ function escapeLogHtml(str){
   });
 }
 
+/* 判斷「清潔／保養是否完成」欄位的值是不是代表「完成」。
+   因為不同表單（或表單改版前後）填的選項文字可能不一樣，
+   例如「已完成清潔」／「未完成清潔」，或單純的「是」／「否」，
+   這裡把常見的正面／負面用詞都涵蓋進去，避免因為文字對不起來而漏掉名單。
+   判斷順序：先看是不是負面用詞（優先排除），排除後才看是不是正面用詞。 */
+function isCleaningDone(value){
+  var s = String(value).trim().toLowerCase();
+  if(!s) return false;
+  var negativeWords = ['未完成', '尚未', '不是', '否', 'no', 'false'];
+  for(var i = 0; i < negativeWords.length; i++){
+    if(s.indexOf(negativeWords[i]) > -1) return false;
+  }
+  var positiveWords = ['已完成', '完成', '是', 'yes', 'true', 'v', '✓'];
+  for(var j = 0; j < positiveWords.length; j++){
+    if(s.indexOf(positiveWords[j]) > -1) return true;
+  }
+  return false;
+}
+
 /* 判斷一筆紀錄裡，是否含有「結案」欄位且已勾選／填寫（表示後台已標記為處理完畢）。
    對應 Google 表單／試算表新增的「結案」欄位：只要那一欄有內容，且不是「否、未、尚未」這類否定字，就視為已結案。
    欄位是空的，或整份資料根本沒有「結案」欄位，就一律視為未結案。 */
@@ -458,7 +477,7 @@ function renderStats(){
     var seenNames = {};
     var doneList = items.filter(function(item){
       var v = findFieldValue(item, fields.cleaningLabel);
-      return v.indexOf('已完成') > -1;
+      return isCleaningDone(v);
     }).map(function(item){
       return {
         owner: findFieldValue(item, fields.ownerLabel),
