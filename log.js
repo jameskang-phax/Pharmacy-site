@@ -339,6 +339,7 @@ function ensureExpiryFilterUI(){
       showResolvedMode = e.target.checked;
       var input = document.getElementById('q');
       renderLogList(searchLog(input.value));
+      renderExpiryItemsPanel();
     });
   }
 }
@@ -506,6 +507,90 @@ function renderStats(){
   body.innerHTML = html;
 }
 
+/* ---------- 效期品項一覽 ----------
+   把有即期／過期警示的品項獨立整理成一張表（藥名／數量／批號／效期狀態／是否已結案），
+   不用逐筆展開卡片就能一眼看到哪些品項要處理。
+   跟主清單的「顯示已結案的紀錄」開關共用同一個狀態（showResolvedMode），
+   預設一樣隱藏已結案的品項，勾選後才會顯示。 */
+function ensureExpiryItemsPanel(){
+  if(document.getElementById('log-expiry-panel')) return;
+  var nameLabel = findHeaderByMatches(['藥名', '品項']);
+  var expiryLabel = findHeaderByMatches(['效期']);
+  if(!nameLabel || !expiryLabel) return; // 這份資料沒有藥名／效期欄位，不需要顯示這個面板
+
+  var qtyLabel = findHeaderByMatches(['數量']);
+  var batchLabel = findHeaderByMatches(['批號']);
+
+  window.LOG_EXPIRY_FIELDS = { nameLabel: nameLabel, expiryLabel: expiryLabel, qtyLabel: qtyLabel, batchLabel: batchLabel };
+
+  var panel = document.createElement('div');
+  panel.id = 'log-expiry-panel';
+  panel.className = 'log-stats-panel';
+  panel.innerHTML =
+    '<div class="log-stats-head"><h3>⏰ 效期品項一覽</h3></div>' +
+    '<div id="expiry-panel-body" class="log-stats-body"></div>';
+
+  var anchor = document.getElementById('log-stats-panel') ||
+               document.getElementById('show-resolved-wrap') ||
+               document.getElementById('expiry-filter-wrap') ||
+               document.querySelector('.search-box');
+  anchor.parentNode.insertBefore(panel, anchor.nextSibling);
+}
+
+function renderExpiryItemsPanel(){
+  var body = document.getElementById('expiry-panel-body');
+  var fields = window.LOG_EXPIRY_FIELDS;
+  if(!body || !fields) return;
+
+  var rows = [];
+  LOG_ITEMS.forEach(function(item){
+    var resolved = itemIsResolved(item);
+    if(resolved && !showResolvedMode) return; // 跟主清單一致：預設隱藏已結案的品項
+    var status = expiryStatus(parseExpiryDate(findFieldValue(item, fields.expiryLabel)));
+    if(!status) return; // 效期還久，不列進這張表
+    rows.push({
+      name: findFieldValue(item, fields.nameLabel),
+      qty: fields.qtyLabel ? findFieldValue(item, fields.qtyLabel) : '',
+      batch: fields.batchLabel ? findFieldValue(item, fields.batchLabel) : '',
+      status: status,
+      resolved: resolved
+    });
+  });
+
+  // 已過期排最前面，其次1個月內到期，再來6個月內到期；同等級依品項名稱排序
+  var severityOrder = { 'log-expiry-expired': 0, 'log-expiry-urgent': 1, 'log-expiry-soon': 2 };
+  rows.sort(function(a, b){
+    var diff = severityOrder[a.status.cls] - severityOrder[b.status.cls];
+    if(diff !== 0) return diff;
+    return String(a.name).localeCompare(String(b.name), 'zh-Hant');
+  });
+
+  if(rows.length === 0){
+    body.innerHTML = '<p class="log-stats-empty">目前沒有即期或過期的品項' + (showResolvedMode ? '' : '（未結案）') + '</p>';
+    return;
+  }
+
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+    '<thead><tr style="border-bottom:1px solid #ddd;text-align:left;">' +
+      '<th style="padding:6px 8px;">品項</th>' +
+      '<th style="padding:6px 8px;">數量</th>' +
+      '<th style="padding:6px 8px;">批號</th>' +
+      '<th style="padding:6px 8px;">效期狀態</th>' +
+      '<th style="padding:6px 8px;">結案</th>' +
+    '</tr></thead><tbody>';
+  rows.forEach(function(r){
+    html += '<tr style="border-bottom:1px solid #f0f0f0;">' +
+      '<td style="padding:6px 8px;">' + escapeLogHtml(r.name || '—') + '</td>' +
+      '<td style="padding:6px 8px;">' + escapeLogHtml(r.qty || '—') + '</td>' +
+      '<td style="padding:6px 8px;">' + escapeLogHtml(r.batch || '—') + '</td>' +
+      '<td style="padding:6px 8px;"><span class="log-expiry-badge ' + r.status.cls + '">' + escapeLogHtml(r.status.label) + '</span></td>' +
+      '<td style="padding:6px 8px;">' + (r.resolved ? '✓ 已結案' : '—') + '</td>' +
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  body.innerHTML = html;
+}
+
 function loadLogData(){
   var list = document.getElementById("list");
   var count = document.getElementById("count");
@@ -548,7 +633,9 @@ function loadLogData(){
 
       ensureExpiryFilterUI();
       ensureStatsUI();
+      ensureExpiryItemsPanel();
       populateStatsMonths();
+      renderExpiryItemsPanel();
 
       var input = document.getElementById("q");
       renderLogList(searchLog(input.value));
