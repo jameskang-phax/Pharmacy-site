@@ -512,10 +512,22 @@ function renderStats(){
    不用逐筆展開卡片就能一眼看到哪些品項要處理。
    跟主清單的「顯示已結案的紀錄」開關共用同一個狀態（showResolvedMode），
    預設一樣隱藏已結案的品項，勾選後才會顯示。 */
+/* 專門用來找「效期」這個日期欄位的標題，避免跟「是否有效期6個月內」這種
+   問答型欄位搞混（那種欄位存的是「有/沒有」文字，不是日期，若誤抓會導致
+   效期一律解析失敗）。優先找完全等於「效期」的欄位；找不到才退而求其次，
+   在含「效期」字樣的欄位裡，排除掉含「是否」或「個月」字樣的問答型欄位。 */
+function findExpiryDateHeader(){
+  var exact = LOG_HEADERS.filter(function(h){ return h.trim() === '效期'; })[0];
+  if(exact) return exact;
+  var candidates = LOG_HEADERS.filter(function(h){ return h.indexOf('效期') > -1; });
+  var preferred = candidates.filter(function(h){ return h.indexOf('是否') === -1 && h.indexOf('個月') === -1; })[0];
+  return preferred || candidates[0] || null;
+}
+
 function ensureExpiryItemsPanel(){
   if(document.getElementById('log-expiry-panel')) return;
   var nameLabel = findHeaderByMatches(['藥名', '品項']);
-  var expiryLabel = findHeaderByMatches(['效期']);
+  var expiryLabel = findExpiryDateHeader();
   if(!nameLabel || !expiryLabel) return; // 這份資料沒有藥名／效期欄位，不需要顯示這個面板
 
   var qtyLabel = findHeaderByMatches(['數量']);
