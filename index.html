@@ -12,6 +12,33 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="藥劑科工作站">
+<style>
+  .fda-marquee{
+    display:flex; align-items:center; gap:12px;
+    background:#fdecea; border:1px solid #f3b7ae; border-radius:8px;
+    padding:8px 14px; margin:10px 0 4px; overflow:hidden;
+  }
+  .fda-marquee-label{
+    flex:0 0 auto; font-weight:700; color:#b3261e; font-size:13px; white-space:nowrap;
+  }
+  .fda-marquee-track{
+    flex:1 1 auto; overflow:hidden; position:relative; height:20px;
+  }
+  .fda-marquee-track ul{
+    position:absolute; top:0; left:0; margin:0; padding:0; list-style:none;
+    display:flex; gap:48px; white-space:nowrap;
+    animation:fda-marquee-scroll 40s linear infinite;
+  }
+  .fda-marquee-track:hover ul{ animation-play-state:paused; }
+  .fda-marquee-track ul li a{
+    color:#8a1c17; text-decoration:none; font-size:13px;
+  }
+  .fda-marquee-track ul li a:hover{ text-decoration:underline; }
+  @keyframes fda-marquee-scroll{
+    from{ transform:translateX(0); }
+    to{ transform:translateX(-50%); }
+  }
+</style>
 </head>
 <body>
 
@@ -42,12 +69,19 @@
     <section class="hero-simple">
       <div class="hero-row">
         <h1><span class="hero-hospital">麻豆新樓醫院</span><span class="hero-dept">藥劑科工作站</span></h1>
-        <div class="visit-counter">
-          <span>累計瀏覽人次</span>
-          <span class="visit-count-badge" id="visit-count">…</span>
-        </div>
+        <a class="visit-counter" href="https://online.lexi.com/lco/action/home" target="_blank" rel="noopener" style="text-decoration:none;">
+          <span class="visit-count-badge">💊 Lexidrug 藥物資料庫</span>
+        </a>
       </div>
     </section>
+
+    <!-- ============ FDA藥品安全資訊跑馬燈 ============
+         資料來源：Google試算表（Apps Script定期抓取FDA網站）→ 發布到網路的CSV
+         抓不到資料時整條跑馬燈會自動隱藏，不影響網站其他功能 -->
+    <div class="fda-marquee" id="fda-marquee" style="display:none;">
+      <span class="fda-marquee-label">⚠️ 藥品安全資訊</span>
+      <div class="fda-marquee-track" id="fda-marquee-track"></div>
+    </div>
 
     <!-- ============ 兩個方塊：科內表單／衛教專區 ============ -->
     <div class="tile-row">
@@ -598,15 +632,6 @@ loadAnnouncements();
   }
 })();
 
-fetch('https://abacus.jasoncameron.dev/hit/sinlau-pharmacy-jameskang-phax/total-visits')
-  .then(function(res){ return res.json(); })
-  .then(function(data){
-    document.getElementById('visit-count').textContent = data.value;
-  })
-  .catch(function(){
-    document.getElementById('visit-count').textContent = '—';
-  });
-
 /* 公告附件縮圖：點擊可以放大檢視，點空白處／關閉鈕／Esc 都能關閉 */
 var eduLightbox = document.getElementById('edu-lightbox');
 var eduLightboxImg = document.getElementById('edu-lightbox-img');
@@ -712,6 +737,65 @@ document.addEventListener('keydown', function(e){
       playWiggle();
     }
   });
+})();
+</script>
+
+<script>
+/* FDA藥品安全資訊跑馬燈：讀取Apps Script發布的CSV，抓不到資料就整條隱藏 */
+(function(){
+  var FDA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREd-6qpMumse0QFqi4CSqT9eUo0kupqvjzP-9ZZNTmhsttR--B8AI-y0pvilT92f_3ABldYbo-RO0i/pub?gid=406018548&single=true&output=csv";
+
+  if(!FDA_CSV_URL || FDA_CSV_URL.indexOf('PUT_') === 0) return; // 還沒設定網址，先不執行
+
+  fetch(FDA_CSV_URL)
+    .then(function(res){ return res.text(); })
+    .then(function(text){
+      var items = parseFdaCsv(text);
+      if(items.length === 0) return;
+
+      var track = document.getElementById('fda-marquee-track');
+      var itemsHtml = items.map(function(it){
+        return '<li><a href="' + it.link + '" target="_blank" rel="noopener">📌 ' +
+               it.date + ' ' + escapeFdaHtml(it.title) + '</a></li>';
+      }).join('');
+      // 內容複製兩份，讓橫向捲動可以無縫接軌
+      track.innerHTML = '<ul>' + itemsHtml + itemsHtml + '</ul>';
+      document.getElementById('fda-marquee').style.display = 'flex';
+    })
+    .catch(function(){ /* 抓不到資料就維持隱藏，不影響網站其他功能 */ });
+
+  function parseFdaCsv(text){
+    var lines = text.trim().split(/\r?\n/);
+    lines.shift(); // 跳過標題列（標題／連結／發布日期）
+    return lines.map(function(line){
+      var cols = splitFdaCsvLine(line);
+      return { title: cols[0] || '', link: cols[1] || '', date: cols[2] || '' };
+    }).filter(function(it){ return it.title && it.link; });
+  }
+
+  // 簡單CSV欄位拆解，處理欄位內容包含逗號、用雙引號包起來的情況
+  function splitFdaCsvLine(line){
+    var result = [];
+    var cur = '';
+    var inQuotes = false;
+    for(var i = 0; i < line.length; i++){
+      var c = line[i];
+      if(c === '"'){
+        inQuotes = !inQuotes;
+      } else if(c === ',' && !inQuotes){
+        result.push(cur);
+        cur = '';
+      } else {
+        cur += c;
+      }
+    }
+    result.push(cur);
+    return result.map(function(s){ return s.trim(); });
+  }
+
+  function escapeFdaHtml(s){
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
 })();
 </script>
 
