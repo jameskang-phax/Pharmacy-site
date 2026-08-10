@@ -42,8 +42,9 @@
   var fileUrl = params.get('url');
 
   if(fileUrl){
-    document.getElementById('doc-frame').src =
-      'https://docs.google.com/gview?url=' + encodeURIComponent(fileUrl) + '&embedded=true';
+    // 現在傳進來的url已經是雲端硬碟的預覽連結（drive.google.com/file/d/.../preview），
+    // 直接嵌入即可，不用再包一層Google文件檢視器
+    document.getElementById('doc-frame').src = fileUrl;
   } else {
     document.getElementById('fallback').style.display = 'block';
   }
