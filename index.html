@@ -755,7 +755,10 @@ document.addEventListener('keydown', function(e){
 
       var track = document.getElementById('fda-marquee-track');
       var itemsHtml = items.map(function(it){
-        return '<li><a href="' + it.link + '" target="_blank" rel="noopener">📌 ' +
+        // FDA的連結是直接下載PDF/Word檔案，改用Google文件檢視器包一層，
+        // 點擊後在瀏覽器分頁直接預覽內容，不用強制下載
+        var viewerUrl = 'https://docs.google.com/gview?url=' + encodeURIComponent(it.link) + '&embedded=true';
+        return '<li><a href="' + viewerUrl + '" target="_blank" rel="noopener">📌 ' +
                it.date + ' ' + escapeFdaHtml(it.title) + '</a></li>';
       }).join('');
       // 內容複製兩份，讓橫向捲動可以無縫接軌
