@@ -14,24 +14,24 @@
 <meta name="apple-mobile-web-app-title" content="藥劑科工作站">
 <style>
   .fda-marquee{
-    display:flex; align-items:center; gap:12px;
+    display:flex; align-items:center; gap:14px;
     background:#fdecea; border:1px solid #f3b7ae; border-radius:8px;
-    padding:8px 14px; margin:10px 0 4px; overflow:hidden;
+    padding:12px 16px; margin:10px 0 4px; overflow:hidden;
   }
   .fda-marquee-label{
-    flex:0 0 auto; font-weight:700; color:#b3261e; font-size:13px; white-space:nowrap;
+    flex:0 0 auto; font-weight:700; color:#b3261e; font-size:17px; white-space:nowrap;
   }
   .fda-marquee-track{
-    flex:1 1 auto; overflow:hidden; position:relative; height:20px;
+    flex:1 1 auto; overflow:hidden; position:relative; height:28px;
   }
   .fda-marquee-track ul{
     position:absolute; top:0; left:0; margin:0; padding:0; list-style:none;
-    display:flex; gap:48px; white-space:nowrap;
+    display:flex; gap:56px; white-space:nowrap;
     animation:fda-marquee-scroll 40s linear infinite;
   }
   .fda-marquee-track:hover ul{ animation-play-state:paused; }
   .fda-marquee-track ul li a{
-    color:#8a1c17; text-decoration:none; font-size:13px;
+    color:#8a1c17; text-decoration:none; font-size:17px;
   }
   .fda-marquee-track ul li a:hover{ text-decoration:underline; }
   @keyframes fda-marquee-scroll{
@@ -757,7 +757,9 @@ document.addEventListener('keydown', function(e){
       var itemsHtml = items.map(function(it){
         // FDA的連結是直接下載PDF/Word檔案，改用Google文件檢視器包一層，
         // 點擊後在瀏覽器分頁直接預覽內容，不用強制下載
-        var viewerUrl = 'https://docs.google.com/gview?url=' + encodeURIComponent(it.link) + '&embedded=true';
+        // 改連到自己的文件預覽包裝頁（pdf-viewer.html），裡面會把Google檢視器
+        // 內容放大顯示，打開就是比較大的畫面，不用自己再手動放大
+        var viewerUrl = 'pdf-viewer.html?url=' + encodeURIComponent(it.link);
         return '<li><a href="' + viewerUrl + '" target="_blank" rel="noopener">📌 ' +
                it.date + ' ' + escapeFdaHtml(it.title) + '</a></li>';
       }).join('');

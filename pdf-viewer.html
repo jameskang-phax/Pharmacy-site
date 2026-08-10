@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文件預覽 · 麻豆新樓醫院藥劑科工作站</title>
+<style>
+  html, body{
+    margin:0; padding:0; height:100%; overflow:hidden; background:#525659;
+  }
+  .viewer-wrap{
+    width:100vw; height:100vh; overflow:auto;
+  }
+  #doc-frame{
+    border:0;
+    width:100%;
+    height:100%;
+    /* 放大顯示：內容整體放大1.3倍，容器可捲動看到放大後超出的部分，
+       這樣打開就直接是比較大的畫面，不用自己再手動放大 */
+    transform:scale(1.3);
+    transform-origin:0 0;
+  }
+  .fallback{
+    position:fixed; top:0; left:0; right:0; padding:14px 18px;
+    background:#fdecea; color:#8a1c17; font-family:"Microsoft JhengHei","PingFang TC",sans-serif;
+    font-size:14px; display:none; z-index:2;
+  }
+  .fallback a{ color:#8a1c17; font-weight:700; }
+</style>
+</head>
+<body>
+
+<div class="fallback" id="fallback">
+  無法載入預覽網址無效，<a id="fallback-link" href="#" target="_blank" rel="noopener">點這裡直接開啟原始檔案</a>
+</div>
+<div class="viewer-wrap">
+  <iframe id="doc-frame" title="文件預覽"></iframe>
+</div>
+
+<script>
+  var params = new URLSearchParams(window.location.search);
+  var fileUrl = params.get('url');
+
+  if(fileUrl){
+    document.getElementById('doc-frame').src =
+      'https://docs.google.com/gview?url=' + encodeURIComponent(fileUrl) + '&embedded=true';
+  } else {
+    document.getElementById('fallback').style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
