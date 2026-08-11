@@ -755,12 +755,10 @@ document.addEventListener('keydown', function(e){
 
       var track = document.getElementById('fda-marquee-track');
       var itemsHtml = items.map(function(it){
-        // FDA的連結是直接下載PDF/Word檔案，改用Google文件檢視器包一層，
-        // 點擊後在瀏覽器分頁直接預覽內容，不用強制下載
-        // 改連到自己的文件預覽包裝頁（pdf-viewer.html），裡面會把Google檢視器
-        // 內容放大顯示，打開就是比較大的畫面，不用自己再手動放大
-        var viewerUrl = 'pdf-viewer.html?url=' + encodeURIComponent(it.link);
-        return '<li><a href="' + viewerUrl + '" target="_blank" rel="noopener">📌 ' +
+        // 資料來源已改成藥害救濟基金會「藥品安全訊息」網頁(tdrf.org.tw)，
+        // 每則都是正常網頁（不是強制下載PDF/Word），可以直接開新分頁顯示，
+        // 不用再像以前FDA原始連結那樣包一層pdf-viewer.html放大顯示
+        return '<li><a href="' + it.link + '" target="_blank" rel="noopener">📌 ' +
                it.date + ' ' + escapeFdaHtml(it.title) + '</a></li>';
       }).join('');
       // 內容複製兩份，讓橫向捲動可以無縫接軌
