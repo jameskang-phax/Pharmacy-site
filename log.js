@@ -299,6 +299,15 @@ function searchLog(keyword){
   if(!showResolvedMode){
     base = base.filter(function(item){ return !itemIsResolved(item); });
   }
+  // 下方紀錄清單跟「📊 每月統計」目前選擇的月份同步顯示（預設選最新一個月，也就是當月），
+  // 避免一次列出全部歷史紀錄；選「全部月份」時才不篩選
+  var monthSelect = document.getElementById('stats-month-select');
+  var statsFields = window.LOG_STATS_FIELDS;
+  if(monthSelect && statsFields && monthSelect.value && monthSelect.value !== 'all'){
+    base = base.filter(function(item){
+      return getItemMonthKey(item, statsFields.dateLabel) === monthSelect.value;
+    });
+  }
   return base;
 }
 
@@ -401,7 +410,11 @@ function ensureStatsUI(){
                document.querySelector('.search-box');
   anchor.parentNode.insertBefore(panel, anchor.nextSibling);
 
-  document.getElementById('stats-month-select').addEventListener('change', renderStats);
+  document.getElementById('stats-month-select').addEventListener('change', function(){
+    renderStats();
+    var input = document.getElementById('q');
+    if(input) renderLogList(searchLog(input.value));
+  });
 }
 
 /* 依目前資料重新列出「有紀錄的月份」選項，盡量保留使用者原本選的月份；
@@ -603,6 +616,63 @@ function renderExpiryItemsPanel(){
   body.innerHTML = html;
 }
 
+/* ---------- 下方紀錄清單收合 ----------
+   使用者要求：查詢紀錄頁預設只呈現「📊 每月統計」（月報），下面逐筆的紀錄清單
+   不用預設展開；點擊展開後，清單只顯示當月（跟月報目前選擇的月份同步，見
+   searchLog() 裡的月份篩選），不是一次列出全部歷史紀錄。
+   做法：把搜尋框、篩選開關（即期/已結案）、紀錄筆數、清單本身、找不到資料/
+   錯誤訊息，通通移進一個原生 <details> 區塊，預設收合（沒有open屬性）。
+   這個函式只會執行一次（有做過就跳過），不影響上面「📊 每月統計」「⏰ 效期品項
+   一覽」兩個面板，那兩個維持一直顯示。 */
+function ensureRecordListCollapsible(){
+  if(document.getElementById('log-list-details')) return;
+
+  var searchBox = document.querySelector('.search-box');
+  var list = document.getElementById('list');
+  if(!searchBox || !list) return; // 頁面結構跟預期不一樣就不處理，避免弄壞頁面
+
+  var count = document.getElementById('count');
+  var empty = document.getElementById('empty');
+  var errorEl = document.getElementById('error');
+  var expiryFilterWrap = document.getElementById('expiry-filter-wrap');
+  var showResolvedWrap = document.getElementById('show-resolved-wrap');
+
+  // 先記住搜尋框原本的位置，如果這份表單沒有「📊每月統計」「⏰效期品項一覽」
+  // 兩個面板可以當定位點時，就把收合區塊插回搜尋框原本的位置
+  var originalParent = searchBox.parentNode;
+  var originalNext = searchBox.nextSibling;
+
+  var style = document.createElement('style');
+  style.textContent =
+    '.log-list-details{margin-top:16px;}' +
+    '.log-list-summary{cursor:pointer;font-weight:600;padding:10px 14px;background:#f4f4f4;border-radius:8px;list-style:none;}' +
+    '.log-list-summary::-webkit-details-marker{display:none;}' +
+    '.log-list-summary::before{content:"▶";display:inline-block;margin-right:6px;transition:transform .15s;}' +
+    '.log-list-details[open] .log-list-summary::before{transform:rotate(90deg);}' +
+    '.log-list-details > .search-box{margin-top:12px;}';
+  document.head.appendChild(style);
+
+  var details = document.createElement('details');
+  details.id = 'log-list-details';
+  details.className = 'log-list-details';
+
+  var summary = document.createElement('summary');
+  summary.className = 'log-list-summary';
+  summary.textContent = '📋 查看歷史紀錄清單（點擊展開，預設只顯示當月）';
+  details.appendChild(summary);
+
+  [searchBox, expiryFilterWrap, showResolvedWrap, count, list, empty, errorEl].forEach(function(el){
+    if(el) details.appendChild(el);
+  });
+
+  var anchor = document.getElementById('log-expiry-panel') || document.getElementById('log-stats-panel');
+  if(anchor){
+    anchor.parentNode.insertBefore(details, anchor.nextSibling);
+  }else{
+    originalParent.insertBefore(details, originalNext);
+  }
+}
+
 function loadLogData(){
   var list = document.getElementById("list");
   var count = document.getElementById("count");
@@ -646,6 +716,7 @@ function loadLogData(){
       ensureExpiryFilterUI();
       ensureStatsUI();
       ensureExpiryItemsPanel();
+      ensureRecordListCollapsible();
       populateStatsMonths();
       renderExpiryItemsPanel();
 
